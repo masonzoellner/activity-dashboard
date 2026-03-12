@@ -10,6 +10,7 @@ import pandas as pd
 from datetime import datetime
 import time
 
+
 def get_pubmed_publications():
 
     authors = [
@@ -32,8 +33,8 @@ def get_pubmed_publications():
     start_dt = datetime.strptime(start_date, "%Y/%m/%d")
     end_dt = datetime.strptime(end_date, "%Y/%m/%d")
 
-    all_articles = []
-    seen_titles = set()
+    # Store articles by PMID
+    articles_dict = {}
 
     for author_name in authors:
 
@@ -76,11 +77,6 @@ def get_pubmed_publications():
 
                 title = article_info.findtext("ArticleTitle", default="n/a").strip()
 
-                if title.lower() in seen_titles:
-                    continue
-
-                seen_titles.add(title.lower())
-
                 journal = article_info.find("Journal").findtext("Title", default="n/a")
 
                 pub_date_elem = article_info.find("Journal/JournalIssue/PubDate")
@@ -94,19 +90,31 @@ def get_pubmed_publications():
                 except:
                     pub_dt = None
 
-                if pub_dt and start_dt <= pub_dt <= end_dt:
+                if pub_dt:
 
-                    all_articles.append({
-                        "author": author_name,
-                        "title": title,
-                        "journal": journal,
-                        "pub_date": pub_dt.strftime("%Y-%m-%d"),
-                        "pubmed_link": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
-                    })
+                    if pmid not in articles_dict:
+
+                        articles_dict[pmid] = {
+                            "title": title,
+                            "authors": [author_name],
+                            "journal": journal,
+                            "pub_date": pub_dt,
+                            "pubmed_link": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+                            
+                        }
+
+                    else:
+
+                        if author_name not in articles_dict[pmid]["authors"]:
+                            articles_dict[pmid]["authors"].append(author_name)
 
             time.sleep(0.5)
 
-    df = pd.DataFrame(all_articles)
+    # Convert to DataFrame
+    df = pd.DataFrame(articles_dict.values())
+
+    # Turn author list into readable string
+    df["authors"] = df["authors"].apply(lambda x: ", ".join(x))
 
     return df
 
