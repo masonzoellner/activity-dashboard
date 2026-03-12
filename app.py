@@ -6,7 +6,7 @@
 
 import streamlit as st
 import pandas as pd
-from datetime import date
+from datetime import date, timedelta
 from pubmed_publications import get_pubmed_publications
 
 
