@@ -62,5 +62,5 @@ st.metric(
 # Table
 # -----------------------------
 
-st.dataframe(filtered_df)
+st.dataframe(filtered_df, hide_index=True)
 
