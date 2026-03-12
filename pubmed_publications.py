@@ -48,10 +48,29 @@ def get_pubmed_publications():
             "retmode": "xml"
         }
 
-        response = requests.get(search_url, params=params)
-        root = ET.fromstring(response.content)
-
-        id_list = [id_elem.text for id_elem in root.findall(".//Id")]
+        id_list = []
+        retstart = 0
+        batch_size = 100
+        
+        while True:
+            params = {
+                "db": "pubmed",
+                "term": query,
+                "retmax": batch_size,
+                "retstart": retstart,
+                "retmode": "xml"
+            }
+        
+            response = requests.get(search_url, params=params)
+            root = ET.fromstring(response.content)
+        
+            ids = [id_elem.text for id_elem in root.findall(".//Id")]
+        
+            if not ids:
+                break
+        
+            id_list.extend(ids)
+            retstart += batch_size
 
         fetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
