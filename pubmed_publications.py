@@ -108,7 +108,7 @@ def get_pubmed_publications():
                         if author_name not in articles_dict[pmid]["authors"]:
                             articles_dict[pmid]["authors"].append(author_name)
 
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     # Convert to DataFrame
     df = pd.DataFrame(articles_dict.values())
