@@ -28,13 +28,14 @@ st.title("CBHDS Publications Dashboard")
 min_date = df["pub_date"].min().date()
 today = date.today()
 
-# -----------------------------
-# Date selector
-# -----------------------------
+default_start = today - timedelta(days=365)
+
+if default_start < min_date:
+    default_start = min_date
 
 start_date, end_date = st.date_input(
     "Select publication date range",
-    value=(min_date, today),
+    value=(default_start, today),
     min_value=min_date,
     max_value=today
 )
