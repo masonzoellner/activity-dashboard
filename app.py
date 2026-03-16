@@ -64,3 +64,32 @@ st.metric(
 
 st.dataframe(filtered_df, hide_index=True)
 
+import matplotlib.pyplot as plt
+
+st.header("CBHDS FTE Growth Over Time")
+
+# Load Excel
+fte_df = pd.read_excel("cbhds_fte_growth.xlsx")
+
+# Select only the columns needed
+fte_plot = fte_df[
+    ["Year", "Affiliated Stats Faculty", "Students", "Admin", "Bachelor's", "Master's", "PhD"]
+]
+
+fte_plot = fte_plot.set_index("Year")
+
+# Create stacked bar chart
+fig, ax = plt.subplots()
+
+fte_plot.plot(
+    kind="bar",
+    stacked=True,
+    ax=ax
+)
+
+ax.set_xlabel("Semester")
+ax.set_ylabel("Total FTE")
+ax.set_title("CBHDS FTE Growth Over Time")
+ax.legend(title="Role", bbox_to_anchor=(1.05, 1))
+
+st.pyplot(fig)
