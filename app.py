@@ -53,43 +53,52 @@ filtered_df = df[
 # Metrics
 # -----------------------------
 
-st.metric(
-    label="Publications in Selected Range",
-    value=len(filtered_df)
-)
-
-# -----------------------------
-# Table
-# -----------------------------
-
-st.dataframe(filtered_df, hide_index=True)
-
 import matplotlib.pyplot as plt
 
-st.header("CBHDS FTE Growth Over Time")
+# Create layout
+col1, col2 = st.columns([1,2])
 
-# Load Excel
-fte_df = pd.read_excel("CBHDS Growth FTE Data 11-12-25.xlsx")
+# -----------------------------
+# LEFT COLUMN (Publications)
+# -----------------------------
+with col1:
 
-# Select only the columns needed
-fte_plot = fte_df[
-    ["Year", "Affiliated Stats Faculty", "Students", "Admin", "Bachelor's", "Master's", "PhD"]
-]
+    st.metric(
+        label="Publications in Selected Range",
+        value=len(filtered_df)
+    )
 
-fte_plot = fte_plot.set_index("Year")
+    with st.expander("View Publications Table"):
+        st.dataframe(filtered_df, hide_index=True)
 
-# Create stacked bar chart
-fig, ax = plt.subplots()
 
-fte_plot.plot(
-    kind="bar",
-    stacked=True,
-    ax=ax
-)
+# -----------------------------
+# RIGHT COLUMN (FTE Graph)
+# -----------------------------
+with col2:
 
-ax.set_xlabel("Semester")
-ax.set_ylabel("Total FTE")
-ax.set_title("CBHDS FTE Growth Over Time")
-ax.legend(title="Role", bbox_to_anchor=(1.05, 1))
+    st.subheader("CBHDS FTE Growth Over Time")
 
-st.pyplot(fig)
+    # Load Excel
+    fte_df = pd.read_excel("CBHDS Growth FTE Data 11-12-25.xlsx")
+
+    # Select needed columns
+    fte_plot = fte_df[
+        ["Year", "Affiliated Stats Faculty", "Students", "Admin", "Bachelor's", "Master's", "PhD"]
+    ]
+
+    fte_plot = fte_plot.set_index("Year")
+
+    fig, ax = plt.subplots()
+
+    fte_plot.plot(
+        kind="bar",
+        stacked=True,
+        ax=ax
+    )
+
+    ax.set_xlabel("Semester")
+    ax.set_ylabel("Total FTE")
+    ax.legend(title="Role", bbox_to_anchor=(1.02, 1))
+
+    st.pyplot(fig)
