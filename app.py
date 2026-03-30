@@ -282,13 +282,13 @@ def load_funding_data():
         columns=["Fiscal Year", "Funding"]
     ).sort_values("Fiscal Year")
 
-    return df
+    return df, grants
 
 
 # -----------------------------
 # Load + Filter
 # -----------------------------
-funding_df = load_funding_data()
+funding_df, grants = load_funding_data()
 
 from datetime import datetime
 
