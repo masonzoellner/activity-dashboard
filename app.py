@@ -103,6 +103,9 @@ def get_fiscal_year(dt):
 def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="grants"):
 
     st.write(f"allocate_funding running for: {dataset_type}")
+    if idx < 5:
+        st.write("RAW ROW START:", row[start_col])
+        st.write("RAW ROW DURATION:", row[duration_col])
 
     df = df.copy()
     df.columns = df.columns.str.strip()
