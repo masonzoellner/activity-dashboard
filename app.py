@@ -48,7 +48,7 @@ st.dataframe(filtered_df)
 st.header("CBHDS FTE Growth Over Time")
 
 # Load Excel
-fte_df = pd.read_excel("C:/Users/mason/Downloads/CBHDS Growth FTE Data 11-12-25.xlsx")
+fte_df = pd.read_excel("CBHDS Growth FTE Data 11-12-25.xlsx")
 
 # Select only the columns needed
 fte_plot = fte_df[
