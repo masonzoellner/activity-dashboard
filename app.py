@@ -350,13 +350,13 @@ def allocate_pending_funding(df):
 
     for _, row in df.iterrows():
         try:
-            status = str(row["Funded "]).strip().lower()
+            status = str(row.get("status_clean", row.get("Funded", row.get("Funded ", "")))).strip().lower()
 
             if "pending" not in status:
                 continue
 
-            vt_total = clean_money(row["Total Directs to VT"])
-            cbhds_total = clean_money(row["Total Directs to CBHDS"])
+            vt_total = clean_money(row.get("Total Directs to VT", 0))
+            cbhds_total = clean_money(row.get("Total Directs to CBHDS", 0))
 
             duration_raw = row["Project Duration (# of Months)"]
             if pd.isna(duration_raw):
