@@ -173,6 +173,12 @@ def load_funding_data():
         columns=["Fiscal Year", "Funding"]
     ).sort_values("Fiscal Year")
 
+    for year in range(2019, current_fy + 1):
+        if year not in df["Fiscal Year"].values:
+            df.loc[len(df)] = [year, 0]
+
+    df = df.sort_values("Fiscal Year")
+
     return df
 
 
