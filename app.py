@@ -183,7 +183,7 @@ def load_funding_data():
 # -----------------------------
 # Load + Filter
 # -----------------------------
-
+st.write("About to load funding data")
 funding_df = load_funding_data()
 
 from datetime import datetime
