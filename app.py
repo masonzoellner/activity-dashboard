@@ -84,12 +84,7 @@ def load_sheet(sheet_name):
     encoded_name = quote(sheet_name)
     url = BASE_URL + encoded_name
 
-    st.write("Loading sheet:", sheet_name)
-    st.write("URL:", url)
-
     df = pd.read_csv(url)
-
-    st.write(sheet_name, "shape:", df.shape)
 
     return df
 
@@ -102,16 +97,8 @@ def get_fiscal_year(dt):
 
 def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="grants"):
 
-    st.write(f"allocate_funding running for: {dataset_type}")
-
     df = df.copy()
     df.columns = df.columns.str.strip()
-
-    st.write("COLUMNS BEING USED:")
-    st.write("start_col =", start_col)
-    st.write("duration_col =", duration_col)
-    st.write("amount_col =", amount_col)
-    st.write("ACTUAL DF COLUMNS:", list(df.columns))
 
     totals = {}
 
@@ -122,9 +109,6 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
         # -------------------------
         # COMMON FIELDS
         # -------------------------
-        if idx < 5:
-            st.write("RAW ROW START:", row[start_col])
-            st.write("RAW ROW DURATION:", row[duration_col])
         
         start = row.get(start_col)
         duration_raw = row.get(duration_col)
@@ -149,9 +133,6 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
         if dataset_type == "grants":
 
             status = str(row.get("status_clean", "")).strip().lower()
-        
-            if idx < 10:
-                st.write("ROW STATUS DEBUG:", idx, status)
         
             if status == "" or status == "nan":
                 continue
@@ -207,7 +188,6 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
 
 @st.cache_data(ttl=86400)
 def load_funding_data():
-    st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
 
     # -------------------------
     # LOAD SHEETS
@@ -260,20 +240,6 @@ def load_funding_data():
             "Total Directs to CBHDS"
         ]
     )
-
-    st.write("Funded Grants AFTER CLEANING:", len(funded_grants))
-
-    # -------------------------
-    # NOW CALL ALLOCATION USING CLEAN DATA ONLY
-    # -------------------------
-    st.write("FINAL GRANTS SHAPE:", funded_grants.shape)
-
-    st.write("NULL CHECK:")
-    st.write(funded_grants[[
-        "Start Date",
-        "Project Duration (# of Months)",
-        "Total Directs to CBHDS"
-    ]].isna().sum())
     
     g_totals = allocate_funding(
         funded_grants,
@@ -310,11 +276,6 @@ def load_funding_data():
     for k, v in i_totals.items():
         combined[k] = combined.get(k, 0) + v
 
-    st.write("GRANTS TOTAL:", sum(g_totals.values()))
-    st.write("CONTRACTS TOTAL:", sum(c_totals.values()))
-    st.write("INTERNAL TOTAL:", sum(i_totals.values()))
-    st.write("COMBINED TOTAL:", sum(combined.values()))
-
     df = pd.DataFrame(
         [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
         columns=["Fiscal Year", "Funding"]
@@ -326,7 +287,6 @@ def load_funding_data():
 # -----------------------------
 # Load + Filter
 # -----------------------------
-st.write("About to load funding data")
 funding_df = load_funding_data()
 
 from datetime import datetime
