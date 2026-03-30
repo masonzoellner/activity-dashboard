@@ -143,7 +143,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 def load_funding_data():
     st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
     grants = load_sheet("Grants")
-    st.write(grants["Start Date"].head(20))
+    st.write(grants["Start Date"].head(200))
     st.write(grants["Start Date"].dtype)
     st.write("Grants columns:")
     st.write(grants.columns)
