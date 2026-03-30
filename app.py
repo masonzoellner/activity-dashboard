@@ -304,8 +304,6 @@ funding_df["FY Label"] = funding_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
 
-st.subheader("DEBUG: Funded Grants (Post-Transform Inspection)")
-
 grants = load_sheet("Grants")
 grants.columns = grants.columns.str.strip()
 
