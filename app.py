@@ -83,7 +83,15 @@ from urllib.parse import quote
 def load_sheet(sheet_name):
     encoded_name = quote(sheet_name)
     url = BASE_URL + encoded_name
-    return pd.read_csv(url)
+
+    st.write("Loading sheet:", sheet_name)
+    st.write("URL:", url)
+
+    df = pd.read_csv(url)
+
+    st.write(sheet_name, "shape:", df.shape)
+
+    return df
 
 
 def get_fiscal_year(dt):
