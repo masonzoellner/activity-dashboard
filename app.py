@@ -205,28 +205,77 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
 @st.cache_data(ttl=86400)
 def load_funding_data():
     st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
+
+    # -------------------------
+    # LOAD SHEETS
+    # -------------------------
     grants = load_sheet("Grants")
-    grants["Start Date"] = pd.to_datetime(grants["Start Date"], errors="coerce")
-    st.write("RAW COLUMNS:")
-    st.write(list(grants.columns))
-    
-    st.write(grants["Start Date"].head(200))
-    st.write(grants["Start Date"].dtype)
-    st.write("Grants columns:")
-    st.write(grants.columns)
     contracts = load_sheet("Contracts/IPAs/TAPs")
     internal = load_sheet("Internal Funding")
 
+    # -------------------------
+    # CLEAN + FILTER GRANTS (THIS IS WHERE DROP-IN GOES)
+    # -------------------------
+    grants.columns = grants.columns.str.strip()
+
+    status_col = "Funded" if "Funded" in grants.columns else "Funded "
+
+    grants["status_clean"] = (
+        grants[status_col]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+    )
+
+    funded_grants = grants[
+        grants["status_clean"].str.contains("funded", na=False)
+    ].copy()
+
+    # ---- STRICT CLEANING ----
+    funded_grants["Start Date"] = pd.to_datetime(
+        funded_grants["Start Date"],
+        errors="coerce"
+    )
+
+    funded_grants["Project Duration (# of Months)"] = pd.to_numeric(
+        funded_grants["Project Duration (# of Months)"],
+        errors="coerce"
+    )
+
+    funded_grants["Total Directs to CBHDS"] = (
+        funded_grants["Total Directs to CBHDS"]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+        .str.strip()
+    )
+
+    funded_grants["Total Directs to CBHDS"] = pd.to_numeric(
+        funded_grants["Total Directs to CBHDS"],
+        errors="coerce"
+    )
+
+    # ---- DROP BAD ROWS ----
+    funded_grants = funded_grants.dropna(
+        subset=[
+            "Start Date",
+            "Project Duration (# of Months)",
+            "Total Directs to CBHDS"
+        ]
+    )
+
+    st.write("Funded Grants AFTER CLEANING:", len(funded_grants))
+
+    # -------------------------
+    # NOW CALL ALLOCATION USING CLEAN DATA ONLY
+    # -------------------------
     g_totals = allocate_funding(
-        grants,
+        funded_grants,
         "Total Directs to CBHDS",
         "Project Duration (# of Months)",
         "Start Date",
         dataset_type="grants"
     )
-
-    st.write("🔵 g_totals (raw):")
-    st.write(g_totals)
 
     c_totals = allocate_funding(
         contracts,
@@ -236,9 +285,6 @@ def load_funding_data():
         dataset_type="contracts"
     )
 
-    st.write("🟠 c_totals (raw):")
-    st.write(c_totals)
-
     i_totals = allocate_funding(
         internal,
         "Total Funds ($)",
@@ -246,30 +292,6 @@ def load_funding_data():
         "Start Date",
         dataset_type="internal"
     )
-
-    st.write("🟢 i_totals (raw):")
-    st.write(i_totals)
-
-    all_years = set(g_totals) | set(c_totals) | set(i_totals)
-
-    combined = {}
-    for year in all_years:
-        combined[year] = (
-            g_totals.get(year, 0)
-            + c_totals.get(year, 0)
-            + i_totals.get(year, 0)
-        )
-
-    st.write("g_totals:", g_totals)
-    st.write("c_totals:", c_totals)
-    st.write("i_totals:", i_totals)
-
-    df = pd.DataFrame(
-        [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
-        columns=["Fiscal Year", "Funding"]
-    ).sort_values("Fiscal Year")
-
-    return df
 
 
 # -----------------------------
