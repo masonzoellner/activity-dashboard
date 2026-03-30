@@ -100,46 +100,26 @@ def get_fiscal_year(dt):
     return dt.year
 
 
-def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False):
+def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="grants"):
 
-    st.write("allocate_funding is running")
+    st.write(f"allocate_funding running for: {dataset_type}")
 
     df = df.copy()
     df.columns = df.columns.str.strip()
 
     totals = {}
 
-    # safer parsing
     df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
 
     for idx, row in df.iterrows():
 
-        status = str(row.get("Funded ", "")).strip().lower()
-
-        if funded_only and "funded" not in status:
-            continue
-
-        raw_value = row.get(amount_col)
-
-        # 🔥 FIX: handle NaN early
-        if pd.isna(raw_value):
-            continue
-
-        # clean money safely
-        raw_value = str(raw_value)
-        raw_value = raw_value.replace("$", "").replace(",", "").strip()
-
-        try:
-            total = float(raw_value)
-        except:
-            continue
-
-        if total <= 0:
-            continue
-
+        # -------------------------
+        # COMMON FIELDS
+        # -------------------------
+        start = row.get(start_col)
         duration_raw = row.get(duration_col)
 
-        if pd.isna(duration_raw):
+        if pd.isna(start) or pd.isna(duration_raw):
             continue
 
         try:
@@ -150,25 +130,52 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
         if duration <= 0:
             continue
 
-        start = row[start_col]
+        # -------------------------
+        # DATASET-SPECIFIC RULES
+        # -------------------------
 
-        st.write("DEBUG ROW:")
-        st.write("start:", start)
-        st.write("amount:", raw_value)
-        st.write("duration:", duration_raw)
-        break
+        # ===== GRANTS =====
+        if dataset_type == "grants":
 
-        # 🔥 IMPORTANT DEBUG (temporarily)
-        if idx < 3:
-            st.write("DEBUG ROW", idx, {
-                "start": start,
-                "amount": total,
-                "duration": duration
-            })
+            status = str(row.get("Funded ", "")).strip().lower()
+            if "funded" not in status:
+                continue
 
-        if pd.isna(start):
+            raw_value = row.get(amount_col)
+            if pd.isna(raw_value):
+                continue
+
+        # ===== CONTRACTS =====
+        elif dataset_type == "contracts":
+
+            raw_value = row.get(amount_col)
+            if pd.isna(raw_value):
+                continue
+
+        # ===== INTERNAL =====
+        elif dataset_type == "internal":
+
+            raw_value = row.get(amount_col)
+            if pd.isna(raw_value):
+                continue
+
+        else:
             continue
 
+        # -------------------------
+        # CLEAN MONEY VALUE
+        # -------------------------
+        try:
+            total = float(str(raw_value).replace("$", "").replace(",", "").strip())
+        except:
+            continue
+
+        if total <= 0:
+            continue
+
+        # -------------------------
+        # ALLOCATE OVER TIME
+        # -------------------------
         monthly = total / duration
 
         for m in range(duration):
@@ -200,7 +207,7 @@ def load_funding_data():
         "Total Directs to CBHDS",
         "Project Duration (# of Months)",
         "Start Date",
-        funded_only=False
+        dataset_type="grants"
     )
 
     st.write("🔵 g_totals (raw):")
@@ -210,7 +217,8 @@ def load_funding_data():
         contracts,
         "Total Directs to CBHDS",
         "Project Duration (# of Months)",
-        "Start Date"
+        "Start Date",
+        dataset_type="contracts"
     )
 
     st.write("🟠 c_totals (raw):")
@@ -220,7 +228,8 @@ def load_funding_data():
         internal,
         "Total Funds ($)",
         "Project Duration (# of Months)",
-        "Start Date"
+        "Start Date",
+        dataset_type="internal"
     )
 
     st.write("🟢 i_totals (raw):")
