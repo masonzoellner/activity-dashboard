@@ -304,8 +304,6 @@ funding_df["FY Label"] = funding_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
 
-status_col = "Funded" if "Funded" in grants.columns else "Funded "
-
 # -----------------------------
 # Plot
 # -----------------------------
