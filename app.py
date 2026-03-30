@@ -153,6 +153,9 @@ def load_funding_data():
     st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
     grants = load_sheet("Grants")
     grants["Start Date"] = pd.to_datetime(grants["Start Date"], errors="coerce")
+    start = row[start_col]
+    if pd.isna(start):
+        continue
     st.write(grants["Start Date"].head(200))
     st.write(grants["Start Date"].dtype)
     st.write("Grants columns:")
