@@ -168,18 +168,15 @@ def load_funding_data():
             + i_totals.get(year, 0)
         )
 
+    print("GRANTS KEYS:", sorted(g_totals.keys()))
+    print("CONTRACTS KEYS:", sorted(c_totals.keys()))
+    print("INTERNAL KEYS:", sorted(i_totals.keys()))
+    print("COMBINED KEYS:", sorted(combined.keys()))
+    
     df = pd.DataFrame(
         [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
         columns=["Fiscal Year", "Funding"]
     ).sort_values("Fiscal Year")
-
-    today = datetime.today()
-
-    current_fy = today.year + 1 if today.month >= 7 else today.year
-    
-    for year in range(2019, current_fy + 1):
-        if year not in df["Fiscal Year"].values:
-            df.loc[len(df)] = [year, 0]
 
     df = df.sort_values("Fiscal Year")
 
