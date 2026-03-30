@@ -100,7 +100,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
         try:
             if funded_only:
-                if str(row["Funded"]).strip().lower() != "funded":
+                if str(row["Funded "]).strip().lower() != "funded":
                     continue
 
             raw_value = str(row[amount_col])
@@ -133,6 +133,8 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 def load_funding_data():
 
     grants = load_sheet("Grants")
+    st.write("Grants columns:")
+    st.write(grants.columns)
     contracts = load_sheet("Contracts/IPAs/TAPs")
     internal = load_sheet("Internal Funding")
 
