@@ -293,6 +293,17 @@ def load_funding_data():
         dataset_type="internal"
     )
 
+    combined = {}
+
+    for k, v in g_totals.items():
+        combined[k] = combined.get(k, 0) + v
+    
+    for k, v in c_totals.items():
+        combined[k] = combined.get(k, 0) + v
+    
+    for k, v in i_totals.items():
+        combined[k] = combined.get(k, 0) + v
+
     df = pd.DataFrame(
         [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
         columns=["Fiscal Year", "Funding"]
