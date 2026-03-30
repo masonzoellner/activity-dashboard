@@ -123,7 +123,8 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
                 fy = get_fiscal_year(current_date)
                 totals[fy] = totals.get(fy, 0) + monthly
 
-        except:
+        except Exception as e:
+            st.write("ROW ERROR:", e)
             continue
 
     return totals
