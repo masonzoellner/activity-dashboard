@@ -94,6 +94,7 @@ def get_fiscal_year(dt):
 
 def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False):
 
+    st.write("🔥 allocate_funding CALLED")
     st.write(df.columns)
     
     totals = {}
