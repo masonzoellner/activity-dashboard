@@ -148,7 +148,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
         # ===== GRANTS =====
         if dataset_type == "grants":
 
-            status = str(row.get("Funded ", "")).strip().lower()
+            status = str(row.get("status_clean", "")).strip().lower()
         
             if idx < 10:
                 st.write("ROW STATUS DEBUG:", idx, status)
@@ -230,35 +230,29 @@ def load_funding_data():
         .str.lower()
     )
 
-    funded_grants = grants[
-        grants["status_clean"].str.contains("funded", na=False)
-    ].copy()
+    funded_grants = grants[grants["status_clean"].str.contains("funded", na=False)].copy()
 
-    # ---- STRICT CLEANING ----
-    funded_grants["Start Date"] = pd.to_datetime(
-        funded_grants["Start Date"],
-        errors="coerce"
-    )
-
+    funded_grants = funded_grants.loc[:, ~funded_grants.columns.str.contains("^Unnamed")]
+    
+    funded_grants["Start Date"] = pd.to_datetime(funded_grants["Start Date"], errors="coerce")
+    
     funded_grants["Project Duration (# of Months)"] = pd.to_numeric(
         funded_grants["Project Duration (# of Months)"],
         errors="coerce"
     )
-
+    
     funded_grants["Total Directs to CBHDS"] = (
         funded_grants["Total Directs to CBHDS"]
         .astype(str)
         .str.replace("$", "", regex=False)
         .str.replace(",", "", regex=False)
-        .str.strip()
     )
-
+    
     funded_grants["Total Directs to CBHDS"] = pd.to_numeric(
         funded_grants["Total Directs to CBHDS"],
         errors="coerce"
     )
-
-    # ---- DROP BAD ROWS ----
+    
     funded_grants = funded_grants.dropna(
         subset=[
             "Start Date",
@@ -272,6 +266,15 @@ def load_funding_data():
     # -------------------------
     # NOW CALL ALLOCATION USING CLEAN DATA ONLY
     # -------------------------
+   st.write("FINAL GRANTS SHAPE:", funded_grants.shape)
+
+    st.write("NULL CHECK:")
+    st.write(funded_grants[[
+        "Start Date",
+        "Project Duration (# of Months)",
+        "Total Directs to CBHDS"
+    ]].isna().sum())
+    
     g_totals = allocate_funding(
         funded_grants,
         "Total Directs to CBHDS",
