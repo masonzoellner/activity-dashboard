@@ -174,10 +174,11 @@ def load_funding_data():
     st.write("COMBINED KEYS:", sorted(combined.keys()))
     
     df = pd.DataFrame(
-        [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
+        list(combined.items()),
         columns=["Fiscal Year", "Funding"]
-    ).sort_values("Fiscal Year")
-
+    )
+    
+    df["Fiscal Year"] = df["Fiscal Year"].astype(int)
     df = df.sort_values("Fiscal Year")
 
     return df
