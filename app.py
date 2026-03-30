@@ -266,7 +266,7 @@ def load_funding_data():
     # -------------------------
     # NOW CALL ALLOCATION USING CLEAN DATA ONLY
     # -------------------------
-   st.write("FINAL GRANTS SHAPE:", funded_grants.shape)
+    st.write("FINAL GRANTS SHAPE:", funded_grants.shape)
 
     st.write("NULL CHECK:")
     st.write(funded_grants[[
