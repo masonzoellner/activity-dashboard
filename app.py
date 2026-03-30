@@ -8,7 +8,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 from pubmed_publications import get_pubmed_publications
 
 
@@ -94,9 +94,6 @@ def get_fiscal_year(dt):
 
 def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False):
 
-    st.write("🔥 allocate_funding CALLED")
-    st.write(df.columns)
-    
     totals = {}
 
     for _, row in df.iterrows():
@@ -126,8 +123,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
                 fy = get_fiscal_year(current_date)
                 totals[fy] = totals.get(fy, 0) + monthly
 
-        except Exception as e:
-            st.write("ROW ERROR:", e)
+        except:
             continue
 
     return totals
@@ -172,18 +168,10 @@ def load_funding_data():
             + i_totals.get(year, 0)
         )
 
-    st.write("GRANTS KEYS:", sorted(g_totals.keys()))
-    st.write("CONTRACTS KEYS:", sorted(c_totals.keys()))
-    st.write("INTERNAL KEYS:", sorted(i_totals.keys()))
-    st.write("COMBINED KEYS:", sorted(combined.keys()))
-    
     df = pd.DataFrame(
-        list(combined.items()),
+        [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
         columns=["Fiscal Year", "Funding"]
-    )
-    
-    df["Fiscal Year"] = df["Fiscal Year"].astype(int)
-    df = df.sort_values("Fiscal Year")
+    ).sort_values("Fiscal Year")
 
     return df
 
