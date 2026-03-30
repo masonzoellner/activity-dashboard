@@ -304,36 +304,9 @@ funding_df["FY Label"] = funding_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
 
-grants = load_sheet("Grants")
 grants.columns = grants.columns.str.strip()
 
 status_col = "Funded" if "Funded" in grants.columns else "Funded "
-
-# clean status
-grants["status_clean"] = grants[status_col].astype(str).str.strip().str.lower()
-funded_grants = grants[grants["status_clean"].str.contains("funded", na=False)].copy()
-
-# -----------------------------
-# APPLY SAME TRANSFORMS YOU USE IN PIPELINE
-# -----------------------------
-
-funded_grants["Start Date Parsed"] = pd.to_datetime(
-    funded_grants["Start Date"],
-    errors="coerce"
-)
-
-funded_grants["Duration Parsed"] = pd.to_numeric(
-    funded_grants["Project Duration (# of Months)"],
-    errors="coerce"
-)
-
-def clean_money(x):
-    try:
-        return float(str(x).replace("$", "").replace(",", "").strip())
-    except:
-        return None
-
-funded_grants["CBHDS Parsed"] = funded_grants["Total Directs to CBHDS"].apply(clean_money)
 
 # -----------------------------
 # Plot
@@ -409,7 +382,6 @@ def allocate_pending_funding(df):
                 cbhds_totals[fy] = cbhds_totals.get(fy, 0) + cbhds_monthly
 
         except Exception as e:
-            print("Row error:", e)
             continue
 
     return vt_totals, cbhds_totals
@@ -526,7 +498,6 @@ def load_redcap_data():
     data = response.json()
 
     df = pd.DataFrame(data)
-    print(df.columns)
 
     return df
 
