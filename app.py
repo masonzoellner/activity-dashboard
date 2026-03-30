@@ -8,7 +8,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from pubmed_publications import get_pubmed_publications
 
 
