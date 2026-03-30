@@ -115,22 +115,33 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
                 if str(row["Funded "]).strip().lower() != "funded":
                     continue
 
-            raw_value = str(row[amount_col])
-            clean_value = raw_value.replace("$", "").replace(",", "").strip()
-            total = float(clean_value)
+           raw_value = str(row[amount_col]).replace("$", "").replace(",", "").strip()
 
+            try:
+                total = float(raw_value)
+            except:
+                continue
+            
+            if pd.isna(total) or total == 0:
+                continue
+            
             duration_raw = row[duration_col]
+            
             if pd.isna(duration_raw):
                 continue
-
-            duration = int(float(str(duration_raw).strip()))
-
-            start = row[start_col]
-
-            if pd.isna(start):
+            
+            try:
+                duration = int(float(str(duration_raw).strip()))
+            except:
                 continue
-
+            
+            if duration <= 0:
+                continue
+            
             monthly = total / duration
+            
+            if pd.isna(monthly) or monthly == float("inf"):
+                continue
 
             for m in range(duration):
                 current_date = start + pd.DateOffset(months=m)
