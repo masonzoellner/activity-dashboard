@@ -182,6 +182,8 @@ def load_funding_data():
     df["Fiscal Year"] = df["Fiscal Year"].astype(int)
     df = df.sort_values("Fiscal Year")
 
+    st.write(df.columns)
+
     return df
 
 
