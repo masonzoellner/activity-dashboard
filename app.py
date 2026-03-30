@@ -301,6 +301,15 @@ grants.columns = grants.columns.str.strip()
 # normalize status column safely
 status_col = "Funded" if "Funded" in grants.columns else "Funded "
 
+# show column dtypes (THIS IS THE ADDITION)
+st.subheader("Column Dtypes")
+dtype_df = pd.DataFrame({
+    "column": grants.columns,
+    "dtype": grants.dtypes.astype(str)
+})
+st.dataframe(dtype_df)
+
+# clean status
 grants["status_clean"] = grants[status_col].astype(str).str.strip().str.lower()
 
 funded_grants = grants[grants["status_clean"].str.contains("funded", na=False)].copy()
@@ -316,6 +325,7 @@ debug_df = funded_grants[
     ]
 ].copy()
 
+st.subheader("Funded Grants Data")
 st.dataframe(debug_df)
 
 # -----------------------------
