@@ -107,6 +107,12 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
     df = df.copy()
     df.columns = df.columns.str.strip()
 
+    st.write("COLUMNS BEING USED:")
+    st.write("start_col =", start_col)
+    st.write("duration_col =", duration_col)
+    st.write("amount_col =", amount_col)
+    st.write("ACTUAL DF COLUMNS:", list(df.columns))
+
     totals = {}
 
     df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
