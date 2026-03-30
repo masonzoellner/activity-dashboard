@@ -173,6 +173,10 @@ def load_funding_data():
         columns=["Fiscal Year", "Funding"]
     ).sort_values("Fiscal Year")
 
+    today = datetime.today()
+
+    current_fy = today.year + 1 if today.month >= 7 else today.year
+    
     for year in range(2019, current_fy + 1):
         if year not in df["Fiscal Year"].values:
             df.loc[len(df)] = [year, 0]
