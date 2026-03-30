@@ -110,6 +110,9 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
     for _, row in df.iterrows():
 
+        st.write("ROW SAMPLE:", row.to_dict())
+        break
+        
         try:
             status = str(row.get("Funded", "")).strip().lower()
 
@@ -162,6 +165,8 @@ def load_funding_data():
     st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
     grants = load_sheet("Grants")
     grants["Start Date"] = pd.to_datetime(grants["Start Date"], errors="coerce")
+    st.write("RAW COLUMNS:")
+    st.write(list(grants.columns))
     
     st.write(grants["Start Date"].head(200))
     st.write(grants["Start Date"].dtype)
