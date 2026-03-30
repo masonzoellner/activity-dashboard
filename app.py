@@ -141,7 +141,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
 @st.cache_data(ttl=86400)
 def load_funding_data():
-
+    st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
     grants = load_sheet("Grants")
     st.write("Grants columns:")
     st.write(grants.columns)
