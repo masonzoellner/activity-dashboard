@@ -94,6 +94,8 @@ def get_fiscal_year(dt):
 
 def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False):
 
+    st.write(df.columns)
+    
     totals = {}
 
     for _, row in df.iterrows():
@@ -181,8 +183,6 @@ def load_funding_data():
     
     df["Fiscal Year"] = df["Fiscal Year"].astype(int)
     df = df.sort_values("Fiscal Year")
-
-    st.write(df.columns)
 
     return df
 
