@@ -168,10 +168,10 @@ def load_funding_data():
             + i_totals.get(year, 0)
         )
 
-    print("GRANTS KEYS:", sorted(g_totals.keys()))
-    print("CONTRACTS KEYS:", sorted(c_totals.keys()))
-    print("INTERNAL KEYS:", sorted(i_totals.keys()))
-    print("COMBINED KEYS:", sorted(combined.keys()))
+    st.write("GRANTS KEYS:", sorted(g_totals.keys()))
+    st.write("CONTRACTS KEYS:", sorted(c_totals.keys()))
+    st.write("INTERNAL KEYS:", sorted(i_totals.keys()))
+    st.write("COMBINED KEYS:", sorted(combined.keys()))
     
     df = pd.DataFrame(
         [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
