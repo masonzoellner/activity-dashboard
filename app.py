@@ -147,17 +147,20 @@ def allocate_funding(df, amount_col, duration_col, start_col, dataset_type="gran
         # ===== GRANTS =====
         # ===== GRANTS =====
         if dataset_type == "grants":
-        
+
             status = str(row.get("Funded ", "")).strip().lower()
         
             if idx < 10:
                 st.write("ROW STATUS DEBUG:", idx, status)
         
-            # only skip clearly non-funded rows (match pending logic style)
             if status == "" or status == "nan":
                 continue
         
             if "funded" not in status:
+                continue
+        
+            raw_value = row.get(amount_col)
+            if pd.isna(raw_value):
                 continue
 
         # ===== CONTRACTS =====
