@@ -80,6 +80,7 @@ BASE_URL = "https://docs.google.com/spreadsheets/d/1kwP-OlmUgbtC_Rn8Hl2yaaV7GSLK
 
 from urllib.parse import quote
 
+
 def load_sheet(sheet_name):
     encoded_name = quote(sheet_name)
     url = BASE_URL + encoded_name
@@ -383,7 +384,7 @@ def allocate_pending_funding(df):
     return vt_totals, cbhds_totals
 
 @st.cache_data(ttl=86400)
-def load_pending_data():
+def load_pending_data(grants):
 
     vt_totals, cbhds_totals = allocate_pending_funding(grants)
 
@@ -411,7 +412,7 @@ from datetime import datetime
 today = datetime.today()
 current_fy = today.year + 1 if today.month >= 7 else today.year
 
-pending_df = load_pending_data()
+pending_df = load_pending_data(grants)
 
 pending_df = pending_df[
     pending_df["Fiscal Year"] >= current_fy
