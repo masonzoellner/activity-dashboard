@@ -100,7 +100,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
         try:
             if funded_only:
-                if str(row["Funded "]).strip().lower() != "funded":
+                if str(row["Funded"]).strip().lower() != "funded":
                     continue
 
             raw_value = str(row[amount_col])
