@@ -94,6 +94,8 @@ def get_fiscal_year(dt):
 
 def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False):
 
+    st.write("allocate_funding is running")
+    
     totals = {}
 
     for _, row in df.iterrows():
@@ -102,8 +104,6 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
             if funded_only:
                 if str(row["Funded "]).strip().lower() != "funded":
                     continue
-
-            st.write("STATUS VALUE:", repr(row["Funded "]))
             
             raw_value = str(row[amount_col])
             clean_value = raw_value.replace("$", "").replace(",", "").strip()
