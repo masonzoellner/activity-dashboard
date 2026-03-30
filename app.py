@@ -175,6 +175,9 @@ def load_funding_data():
         funded_only=True
     )
 
+    st.write("🔵 g_totals (raw):")
+    st.write(g_totals)
+
     c_totals = allocate_funding(
         contracts,
         "Total Directs to CBHDS",
@@ -182,12 +185,18 @@ def load_funding_data():
         "Start Date"
     )
 
+    st.write("🟠 c_totals (raw):")
+    st.write(c_totals)
+
     i_totals = allocate_funding(
         internal,
         "Total Funds ($)",
         "Project Duration (# of Months)",
         "Start Date"
     )
+
+    st.write("🟢 i_totals (raw):")
+    st.write(i_totals)
 
     all_years = set(g_totals) | set(c_totals) | set(i_totals)
 
