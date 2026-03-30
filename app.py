@@ -385,8 +385,6 @@ def allocate_pending_funding(df):
 @st.cache_data(ttl=86400)
 def load_pending_data():
 
-    grants = load_sheet("Grants")
-
     vt_totals, cbhds_totals = allocate_pending_funding(grants)
 
     all_years = set(vt_totals) | set(cbhds_totals)
