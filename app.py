@@ -111,9 +111,10 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
     for _, row in df.iterrows():
 
         try:
-            if funded_only:
-                if str(row["Funded "]).strip().lower() != "funded":
-                    continue
+            status = str(row.get("Funded ", "")).strip().lower()
+
+            if funded_only and "funded" not in status:
+                continue
 
                     raw_value = str(row[amount_col]).replace("$", "").replace(",", "").strip()
             
