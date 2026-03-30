@@ -293,6 +293,31 @@ funding_df["FY Label"] = funding_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
 
+st.subheader("DEBUG: Funded Grants Raw Inspection")
+
+grants = load_sheet("Grants")
+grants.columns = grants.columns.str.strip()
+
+# normalize status column safely
+status_col = "Funded" if "Funded" in grants.columns else "Funded "
+
+grants["status_clean"] = grants[status_col].astype(str).str.strip().str.lower()
+
+funded_grants = grants[grants["status_clean"].str.contains("funded", na=False)].copy()
+
+st.write("Funded Grants Count:", len(funded_grants))
+
+debug_df = funded_grants[
+    [
+        "Start Date",
+        "Project Duration (# of Months)",
+        "Total Directs to CBHDS",
+        status_col
+    ]
+].copy()
+
+st.dataframe(debug_df)
+
 # -----------------------------
 # Plot
 # -----------------------------
