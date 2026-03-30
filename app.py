@@ -293,40 +293,77 @@ funding_df["FY Label"] = funding_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
 
-st.subheader("DEBUG: Funded Grants Raw Inspection")
+st.subheader("DEBUG: Funded Grants (Post-Transform Inspection)")
 
 grants = load_sheet("Grants")
 grants.columns = grants.columns.str.strip()
 
-# normalize status column safely
 status_col = "Funded" if "Funded" in grants.columns else "Funded "
-
-# show column dtypes (THIS IS THE ADDITION)
-st.subheader("Column Dtypes")
-dtype_df = pd.DataFrame({
-    "column": grants.columns,
-    "dtype": grants.dtypes.astype(str)
-})
-st.dataframe(dtype_df)
 
 # clean status
 grants["status_clean"] = grants[status_col].astype(str).str.strip().str.lower()
-
 funded_grants = grants[grants["status_clean"].str.contains("funded", na=False)].copy()
 
-st.write("Funded Grants Count:", len(funded_grants))
+# -----------------------------
+# APPLY SAME TRANSFORMS YOU USE IN PIPELINE
+# -----------------------------
 
-debug_df = funded_grants[
-    [
-        "Start Date",
-        "Project Duration (# of Months)",
-        "Total Directs to CBHDS",
-        status_col
+funded_grants["Start Date Parsed"] = pd.to_datetime(
+    funded_grants["Start Date"],
+    errors="coerce"
+)
+
+funded_grants["Duration Parsed"] = pd.to_numeric(
+    funded_grants["Project Duration (# of Months)"],
+    errors="coerce"
+)
+
+def clean_money(x):
+    try:
+        return float(str(x).replace("$", "").replace(",", "").strip())
+    except:
+        return None
+
+funded_grants["CBHDS Parsed"] = funded_grants["Total Directs to CBHDS"].apply(clean_money)
+
+# -----------------------------
+# SHOW DTYPE SUMMARY AFTER CLEANING
+# -----------------------------
+
+dtype_summary = pd.DataFrame({
+    "column": [
+        "Start Date Parsed",
+        "Duration Parsed",
+        "CBHDS Parsed"
+    ],
+    "dtype": [
+        funded_grants["Start Date Parsed"].dtype,
+        funded_grants["Duration Parsed"].dtype,
+        funded_grants["CBHDS Parsed"].dtype
     ]
-].copy()
+})
 
-st.subheader("Funded Grants Data")
-st.dataframe(debug_df)
+st.subheader("Post-Transform Dtypes")
+st.dataframe(dtype_summary)
+
+# -----------------------------
+# SHOW ACTUAL VALUES (SANITY CHECK)
+# -----------------------------
+
+st.subheader("Post-Transform Sample Data")
+st.dataframe(
+    funded_grants[
+        [
+            "Start Date",
+            "Start Date Parsed",
+            "Project Duration (# of Months)",
+            "Duration Parsed",
+            "Total Directs to CBHDS",
+            "CBHDS Parsed",
+            status_col
+        ]
+    ].head(50)
+)
 
 # -----------------------------
 # Plot
