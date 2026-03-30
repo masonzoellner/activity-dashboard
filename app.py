@@ -152,6 +152,12 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
         start = row[start_col]
 
+        st.write("DEBUG ROW:")
+        st.write("start:", start)
+        st.write("amount:", raw_value)
+        st.write("duration:", duration_raw)
+        break
+
         # 🔥 IMPORTANT DEBUG (temporarily)
         if idx < 3:
             st.write("DEBUG ROW", idx, {
