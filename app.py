@@ -103,8 +103,10 @@ def get_fiscal_year(dt):
 def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False):
 
     st.write("allocate_funding is running")
-    
+
     totals = {}
+
+    df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
 
     for _, row in df.iterrows():
 
@@ -112,7 +114,7 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
             if funded_only:
                 if str(row["Funded "]).strip().lower() != "funded":
                     continue
-            
+
             raw_value = str(row[amount_col])
             clean_value = raw_value.replace("$", "").replace(",", "").strip()
             total = float(clean_value)
@@ -120,9 +122,8 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
             duration_raw = row[duration_col]
             if pd.isna(duration_raw):
                 continue
-            duration = int(float(str(duration_raw).strip()))
 
-            df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
+            duration = int(float(str(duration_raw).strip()))
 
             start = row[start_col]
 
