@@ -293,6 +293,13 @@ def load_funding_data():
         dataset_type="internal"
     )
 
+    df = pd.DataFrame(
+        [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
+        columns=["Fiscal Year", "Funding"]
+    ).sort_values("Fiscal Year")
+
+    return df
+
 
 # -----------------------------
 # Load + Filter
