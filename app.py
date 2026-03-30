@@ -104,58 +104,67 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
     st.write("allocate_funding is running")
 
+    # 🔧 normalize column names (CRITICAL FIX)
+    df.columns = df.columns.str.strip()
+
     totals = {}
 
+    # convert start dates safely
     df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
 
-    for _, row in df.iterrows():
+    for idx, row in df.iterrows():
 
-        st.write("ROW SAMPLE:", row.to_dict())
-        break
-        
-        try:
-            status = str(row.get("Funded", "")).strip().lower()
+        # DEBUG (only first row)
+        if idx == 0:
+            st.write("ROW SAMPLE:", row.to_dict())
 
-            if funded_only and "funded" not in status:
-                continue
+        # 🔧 FIX: correct column name
+        status = str(row.get("Funded ", "")).strip().lower()
 
-            raw_value = str(row.get(amount_col, "")).replace("$", "").replace(",", "").strip()
-
-            try:
-                total = float(raw_value)
-            except:
-                continue
-
-            if pd.isna(total) or total == 0:
-                continue
-
-            duration_raw = row.get(duration_col)
-
-            if pd.isna(duration_raw):
-                continue
-
-            try:
-                duration = int(float(str(duration_raw).strip()))
-            except:
-                continue
-
-            if duration <= 0:
-                continue
-
-            monthly = total / duration
-
-            start = row[start_col]
-            if pd.isna(start):
-                continue
-
-            for m in range(duration):
-                current_date = start + pd.DateOffset(months=m)
-                fy = get_fiscal_year(current_date)
-                totals[fy] = totals.get(fy, 0) + monthly
-
-        except Exception as e:
-            st.write("Row error:", e)
+        # optional filter
+        if funded_only and "funded" not in status:
             continue
+
+        raw_value = row.get(amount_col)
+
+        if pd.isna(raw_value):
+            continue
+
+        raw_value = str(raw_value).replace("$", "").replace(",", "").strip()
+
+        try:
+            total = float(raw_value)
+        except:
+            continue
+
+        if total <= 0:
+            continue
+
+        duration_raw = row.get(duration_col)
+
+        if pd.isna(duration_raw):
+            continue
+
+        try:
+            duration = int(float(duration_raw))
+        except:
+            continue
+
+        if duration <= 0:
+            continue
+
+        start = row[start_col]
+
+        if pd.isna(start):
+            continue
+
+        monthly = total / duration
+
+        for m in range(duration):
+            current_date = start + pd.DateOffset(months=m)
+            fy = get_fiscal_year(current_date)
+
+            totals[fy] = totals.get(fy, 0) + monthly
 
     return totals
 
