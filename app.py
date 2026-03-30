@@ -180,7 +180,7 @@ def load_funding_data():
         "Total Directs to CBHDS",
         "Project Duration (# of Months)",
         "Start Date",
-        funded_only=True
+        funded_only=False
     )
 
     st.write("🔵 g_totals (raw):")
