@@ -104,33 +104,30 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
 
     st.write("allocate_funding is running")
 
-    # 🔧 normalize column names (CRITICAL FIX)
+    df = df.copy()
     df.columns = df.columns.str.strip()
 
     totals = {}
 
-    # convert start dates safely
+    # safer parsing
     df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
 
     for idx, row in df.iterrows():
 
-        # DEBUG (only first row)
-        if idx == 0:
-            st.write("ROW SAMPLE:", row.to_dict())
-
-        # 🔧 FIX: correct column name
         status = str(row.get("Funded ", "")).strip().lower()
 
-        # optional filter
         if funded_only and "funded" not in status:
             continue
 
         raw_value = row.get(amount_col)
 
+        # 🔥 FIX: handle NaN early
         if pd.isna(raw_value):
             continue
 
-        raw_value = str(raw_value).replace("$", "").replace(",", "").strip()
+        # clean money safely
+        raw_value = str(raw_value)
+        raw_value = raw_value.replace("$", "").replace(",", "").strip()
 
         try:
             total = float(raw_value)
@@ -154,6 +151,14 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
             continue
 
         start = row[start_col]
+
+        # 🔥 IMPORTANT DEBUG (temporarily)
+        if idx < 3:
+            st.write("DEBUG ROW", idx, {
+                "start": start,
+                "amount": total,
+                "duration": duration
+            })
 
         if pd.isna(start):
             continue
