@@ -103,6 +103,8 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
                 if str(row["Funded "]).strip().lower() != "funded":
                     continue
 
+            st.write("STATUS VALUE:", repr(row["Funded "]))
+            
             raw_value = str(row[amount_col])
             clean_value = raw_value.replace("$", "").replace(",", "").strip()
             total = float(clean_value)
