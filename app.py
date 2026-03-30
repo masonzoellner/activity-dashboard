@@ -304,6 +304,11 @@ def load_funding_data():
     for k, v in i_totals.items():
         combined[k] = combined.get(k, 0) + v
 
+    st.write("GRANTS TOTAL:", sum(g_totals.values()))
+    st.write("CONTRACTS TOTAL:", sum(c_totals.values()))
+    st.write("INTERNAL TOTAL:", sum(i_totals.values()))
+    st.write("COMBINED TOTAL:", sum(combined.values()))
+
     df = pd.DataFrame(
         [(int(k), v) for k, v in combined.items() if str(k).isdigit()],
         columns=["Fiscal Year", "Funding"]
