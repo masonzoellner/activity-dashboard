@@ -350,7 +350,7 @@ def allocate_pending_funding(df):
 
     for _, row in df.iterrows():
         try:
-            status = str(row.get("status_clean", row.get("Funded", row.get("Funded ", "")))).strip().lower()
+            status = str(row.get("status_clean", "")).strip().lower()
 
             if "pending" not in status:
                 continue
@@ -412,7 +412,20 @@ from datetime import datetime
 today = datetime.today()
 current_fy = today.year + 1 if today.month >= 7 else today.year
 
-pending_df = load_pending_data(grants)
+grants_pending = grants.copy()
+
+grants_pending["status_clean"] = (
+    grants_pending["Funded"]
+    .astype(str)
+    .str.strip()
+    .str.lower()
+)
+
+grants_pending = grants_pending[
+    grants_pending["status_clean"].str.contains("pending", na=False)
+]
+
+pending_df = load_pending_data(grants_pending)
 
 pending_df = pending_df[
     pending_df["Fiscal Year"] >= current_fy
