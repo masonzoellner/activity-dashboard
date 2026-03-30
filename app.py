@@ -338,45 +338,6 @@ def clean_money(x):
 funded_grants["CBHDS Parsed"] = funded_grants["Total Directs to CBHDS"].apply(clean_money)
 
 # -----------------------------
-# SHOW DTYPE SUMMARY AFTER CLEANING
-# -----------------------------
-
-dtype_summary = pd.DataFrame({
-    "column": [
-        "Start Date Parsed",
-        "Duration Parsed",
-        "CBHDS Parsed"
-    ],
-    "dtype": [
-        funded_grants["Start Date Parsed"].dtype,
-        funded_grants["Duration Parsed"].dtype,
-        funded_grants["CBHDS Parsed"].dtype
-    ]
-})
-
-st.subheader("Post-Transform Dtypes")
-st.dataframe(dtype_summary)
-
-# -----------------------------
-# SHOW ACTUAL VALUES (SANITY CHECK)
-# -----------------------------
-
-st.subheader("Post-Transform Sample Data")
-st.dataframe(
-    funded_grants[
-        [
-            "Start Date",
-            "Start Date Parsed",
-            "Project Duration (# of Months)",
-            "Duration Parsed",
-            "Total Directs to CBHDS",
-            "CBHDS Parsed",
-            status_col
-        ]
-    ].head(50)
-)
-
-# -----------------------------
 # Plot
 # -----------------------------
 
