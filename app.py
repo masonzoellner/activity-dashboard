@@ -122,7 +122,16 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
                 continue
             duration = int(float(str(duration_raw).strip()))
 
-            start = pd.to_datetime(row[start_col], errors="coerce")
+            raw_date = row[start_col]
+
+            if pd.isna(raw_date) or str(raw_date).strip().lower() in ["none", "nan", ""]:
+                continue
+            
+            start = pd.to_datetime(raw_date, errors="coerce")
+            
+            if pd.isna(start):
+                st.write("UNPARSEABLE DATE:", raw_date)
+                continue
             if pd.isna(start):
                 continue
 
