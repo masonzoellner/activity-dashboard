@@ -122,16 +122,10 @@ def allocate_funding(df, amount_col, duration_col, start_col, funded_only=False)
                 continue
             duration = int(float(str(duration_raw).strip()))
 
-            raw_date = row[start_col]
+            df[start_col] = pd.to_datetime(df[start_col], errors="coerce")
 
-            if pd.isna(raw_date) or str(raw_date).strip().lower() in ["none", "nan", ""]:
-                continue
-            
-            start = pd.to_datetime(raw_date, errors="coerce")
-            
-            if pd.isna(start):
-                st.write("UNPARSEABLE DATE:", raw_date)
-                continue
+            start = row[start_col]
+
             if pd.isna(start):
                 continue
 
@@ -153,9 +147,7 @@ def load_funding_data():
     st.write("🔥 NEW VERSION OF load_funding_data IS RUNNING")
     grants = load_sheet("Grants")
     grants["Start Date"] = pd.to_datetime(grants["Start Date"], errors="coerce")
-    start = row[start_col]
-    if pd.isna(start):
-        continue
+    
     st.write(grants["Start Date"].head(200))
     st.write(grants["Start Date"].dtype)
     st.write("Grants columns:")
