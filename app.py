@@ -54,7 +54,15 @@ st.dataframe(filtered_df)
 st.header("CBHDS FTE Growth Over Time")
 
 # Load Excel
-fte_df = pd.read_excel("CBHDS Growth FTE Data 11-12-25.xlsx")
+FTE_URL = "https://docs.google.com/spreadsheets/d/1qrk1yGZqo9rD72ZoRKXqWei-1EzG63mU/export?format=csv&gid=942016022"
+
+@st.cache_data(ttl=3600)
+def load_fte_data():
+    df = pd.read_csv(FTE_URL)
+    df.columns = df.columns.str.strip()
+    return df
+
+fte_df = load_fte_data()
 
 # Select only the columns needed
 fte_plot = fte_df[
