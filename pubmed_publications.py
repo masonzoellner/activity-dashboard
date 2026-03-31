@@ -62,6 +62,14 @@ def get_pubmed_publications():
             }
         
             response = requests.get(search_url, params=params)
+
+            if response.status_code != 200 or not response.content.strip():
+                continue  # skip bad response
+            
+            try:
+                root = ET.fromstring(response.content)
+            except ET.ParseError:
+                continue  # skip malformed XML
             root = ET.fromstring(response.content)
         
             ids = [id_elem.text for id_elem in root.findall(".//Id")]
