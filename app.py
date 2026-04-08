@@ -564,3 +564,76 @@ ax4.set_ylabel("Number of Drop-ins")
 ax4.set_title("CBHDS Drop-ins Over Time")
 
 st.pyplot(fig4)
+
+API_TOKEN_COLLAB_1 = "5A3187A0A0C21BCC63B98BE56C08F197"
+API_TOKEN_COLLAB_2 = "B6FB83BC6AA3DEA43B9B4B69DB9C4F98"
+
+@st.cache_data(ttl=3600)
+def load_collab_data(token):
+    url = "https://redcap.vtc.vt.edu/api/" 
+
+    payload = {
+        'token': token,
+        'content': 'record',
+        'format': 'json',
+        'type': 'flat'
+    }
+
+    response = requests.post(url, data=payload)
+    data = response.json()
+
+    return pd.DataFrame(data)
+
+def process_collaborations(df1, df2):
+
+    # ----- FIRST REDCAP -----
+    df1["date"] = pd.to_datetime(df1["todays_date"], errors="coerce")
+    df1 = df1.dropna(subset=["date"])
+
+    # ----- SECOND REDCAP -----
+    # Keep only sessiontype_c == "1"
+    df2 = df2[df2["sessiontype_c"] == "1"]
+
+    df2["date"] = pd.to_datetime(df2["todays_date_c"], errors="coerce")
+    df2 = df2.dropna(subset=["date"])
+
+    # ----- COMBINE -----
+    combined = pd.concat([df1[["date"]], df2[["date"]]])
+
+    # ----- FISCAL YEAR -----
+    combined["Fiscal Year"] = combined["date"].apply(
+        lambda x: x.year + 1 if x.month >= 7 else x.year
+    )
+
+    counts = combined.groupby("Fiscal Year").size().reset_index(name="Collaborations")
+
+    counts["FY Label"] = counts["Fiscal Year"].apply(
+        lambda x: f"FY{int(x) % 100}"
+    )
+
+    return counts
+
+st.subheader("Collaborations by Fiscal Year")
+
+df1 = load_collab_data(API_TOKEN_COLLAB_1)
+df2 = load_collab_data(API_TOKEN_COLLAB_2)
+
+collab_df = process_collaborations(df1, df2)
+
+fig5, ax5 = plt.subplots()
+
+ax5.plot(
+    collab_df["FY Label"],
+    collab_df["Collaborations"],
+    marker='o'
+)
+
+# Labels on points
+for x, y in zip(collab_df["FY Label"], collab_df["Collaborations"]):
+    ax5.text(x, y, str(int(y)), ha='center', va='bottom')
+
+ax5.set_xlabel("Fiscal Year")
+ax5.set_ylabel("Number of Collaborations")
+ax5.set_title("CBHDS Collaborations Over Time")
+
+st.pyplot(fig5)
