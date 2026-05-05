@@ -304,11 +304,78 @@ def load_funding_data():
 
     return df, grants
 
+@st.cache_data(ttl=3600)
+def load_salaries():
+    df = load_sheet("Salaries")
+
+    df = df.copy()
+
+    # First column is FY label
+    df.rename(columns={df.columns[0]: "FY"}, inplace=True)
+
+    # Clean all money cells
+    def clean_cell(x):
+        try:
+            x = str(x).split("/")[0]  # take value before "/"
+            x = x.replace("$", "").replace(",", "").strip()
+            return float(x) if x not in ["", "nan"] else 0.0
+        except:
+            return 0.0
+
+    for col in df.columns[1:]:
+        df[col] = df[col].apply(clean_cell)
+
+    # Sum across all columns for each FY
+    df["Salary Expenses"] = df.iloc[:, 1:].sum(axis=1)
+
+    # Extract FY number
+    df["Fiscal Year"] = df["FY"].str.extract(r"(\d+)").astype(int)
+
+    return df[["Fiscal Year", "Salary Expenses"]]
+
 
 # -----------------------------
 # Load + Filter
 # -----------------------------
-funding_df, grants = load_funding_data()
+funding_df, grants = load_funding_data
+
+# -----------------------------
+# Funded totals by FY (VT + CBHDS)
+# -----------------------------
+funded_only = grants[grants["status_clean"].str.contains("funded", na=False)].copy()
+
+# Clean money columns
+for col in ["Total Directs to VT", "Total Directs to CBHDS"]:
+    funded_only[col] = (
+        funded_only[col]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+    funded_only[col] = pd.to_numeric(funded_only[col], errors="coerce")
+
+funded_only["Start Date"] = pd.to_datetime(funded_only["Start Date"], errors="coerce")
+
+funded_only["Fiscal Year"] = funded_only["Start Date"].apply(
+    lambda x: x.year + 1 if pd.notna(x) and x.month >= 7 else x.year if pd.notna(x) else None
+)
+
+funded_summary = funded_only.groupby("Fiscal Year").agg({
+    "Total Directs to VT": "sum",
+    "Total Directs to CBHDS": "sum"
+}).reset_index()
+
+# Load salaries
+salary_df = load_salaries()
+
+# Merge all data
+final_df = funding_df.merge(funded_summary, on="Fiscal Year", how="left")
+final_df = final_df.merge(salary_df, on="Fiscal Year", how="left")
+
+final_df = final_df.fillna(0)
+
+# Labels
+final_df["FY Label"] = final_df["Fiscal Year"].apply(lambda x: f"FY{int(x)%100}")
 
 from datetime import datetime
 
@@ -636,3 +703,56 @@ ax5.set_ylabel("Number of Collaborations")
 ax5.set_title("CBHDS Collaborations Over Time")
 
 st.pyplot(fig5)
+
+st.subheader("CBHDS Funding and Salary Expenses")
+
+fig6, ax6 = plt.subplots()
+
+x = range(len(final_df))
+
+# Width for side-by-side bars
+width = 0.35
+
+# Left bar (stacked funding)
+ax6.bar(
+    [i - width/2 for i in x],
+    final_df["Total Directs to VT"],
+    width,
+    label="VT Directs"
+)
+
+ax6.bar(
+    [i - width/2 for i in x],
+    final_df["Total Directs to CBHDS"],
+    width,
+    bottom=final_df["Total Directs to VT"],
+    label="CBHDS Directs"
+)
+
+ax6.bar(
+    [i - width/2 for i in x],
+    final_df["Funding"],
+    width,
+    bottom=final_df["Total Directs to VT"] + final_df["Total Directs to CBHDS"],
+    label="Sponsored Funding"
+)
+
+# Right bar (salary)
+ax6.bar(
+    [i + width/2 for i in x],
+    final_df["Salary Expenses"],
+    width,
+    label="Salary Expenses"
+)
+
+# Labels
+ax6.set_xticks(x)
+ax6.set_xticklabels(final_df["FY Label"])
+
+ax6.set_xlabel("Fiscal Year")
+ax6.set_ylabel("Amount ($)")
+ax6.set_title("CBHDS Funding vs Salary Expenses")
+
+ax6.legend()
+
+st.pyplot(fig6)
