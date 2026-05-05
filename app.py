@@ -437,13 +437,6 @@ current_fy = today.year + 1 if today.month >= 7 else today.year
 
 grants_pending = grants.copy()
 
-grants_pending["status_clean"] = (
-    grants_pending["Funded"]
-    .astype(str)
-    .str.strip()
-    .str.lower()
-)
-
 grants_pending = grants_pending[
     grants_pending["status_clean"].str.contains("pending", na=False)
 ]
