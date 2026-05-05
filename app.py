@@ -216,8 +216,17 @@ def load_funding_data():
     # -------------------------
     grants.columns = grants.columns.str.strip()
 
-    status_col = "Funded" if "Funded" in grants.columns else "Funded "
-
+    # Find the correct status column dynamically
+    status_col = None
+    for col in grants.columns:
+        if "fund" in col.lower():
+            status_col = col
+            break
+    
+    if status_col is None:
+        st.error(f"Could not find a funding status column. Columns are: {list(grants.columns)}")
+        st.stop()
+    
     grants["status_clean"] = (
         grants[status_col]
         .astype(str)
