@@ -453,6 +453,8 @@ pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
 
 st.subheader("Pending Funding")
 
+st.write(grants["status_clean"].value_counts())
+
 fig3, ax3 = plt.subplots()
 
 ax3.bar(
