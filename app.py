@@ -224,8 +224,6 @@ def load_funding_data():
     
     status_col = grants.columns[1]
     
-    st.write("Using status column:", status_col)  # optional debug
-    
     grants["status_clean"] = (
         grants[status_col]
         .astype(str)
@@ -451,8 +449,6 @@ pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
 )
 
 st.subheader("Pending Funding")
-
-st.write(grants["status_clean"].value_counts())
 
 fig3, ax3 = plt.subplots()
 
