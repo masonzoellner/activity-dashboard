@@ -337,7 +337,7 @@ def load_salaries():
 # -----------------------------
 # Load + Filter
 # -----------------------------
-funding_df, grants = load_funding_data
+funding_df, grants = load_funding_data()
 
 # -----------------------------
 # Funded totals by FY (VT + CBHDS)
