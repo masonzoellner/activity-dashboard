@@ -514,69 +514,37 @@ def clean_money(value):
     except:
         return 0.0
 
-def allocate_pending_funding(df):
+def get_pending_funding_by_fy(df):
 
     vt_totals = {}
     cbhds_totals = {}
 
     for _, row in df.iterrows():
-        try:
-            status = str(row.get("status_clean", "")).strip().lower()
 
-            if "pending" not in status:
-                continue
+        vt_total = clean_money(row["Total Directs to VT"])
+        cbhds_total = clean_money(row["Total Directs to CBHDS"])
 
-            vt_total = clean_money(row.get("Total Directs to VT", 0))
-            cbhds_total = clean_money(row.get("Total Directs to CBHDS", 0))
+        duration = int(row["Project Duration (# of Months)"])
+        start = pd.to_datetime(row["Start Date"], errors="coerce")
 
-            duration_raw = row["Project Duration (# of Months)"]
-            if pd.isna(duration_raw):
-                continue
-
-            duration = int(float(str(duration_raw).strip()))
-
-            start = pd.to_datetime(row["Start Date"], errors="coerce")
-            if pd.isna(start):
-                continue
-
-            vt_monthly = vt_total / duration
-            cbhds_monthly = cbhds_total / duration
-
-            for m in range(duration):
-                current_date = start + pd.DateOffset(months=m)
-                fy = get_fiscal_year(current_date)
-
-                vt_totals[fy] = vt_totals.get(fy, 0) + vt_monthly
-                cbhds_totals[fy] = cbhds_totals.get(fy, 0) + cbhds_monthly
-
-        except Exception as e:
+        if pd.isna(start) or duration <= 0:
             continue
 
-    return vt_totals, cbhds_totals
+        vt_monthly = vt_total / duration
+        cbhds_monthly = cbhds_total / duration
 
-@st.cache_data(ttl=86400)
-def load_pending_data(grants):
+        for m in range(duration):
+            current_date = start + pd.DateOffset(months=m)
+            fy = get_fiscal_year(current_date)
 
-    vt_totals, cbhds_totals = allocate_pending_funding(grants)
+            vt_totals[fy] = vt_totals.get(fy, 0) + vt_monthly
+            cbhds_totals[fy] = cbhds_totals.get(fy, 0) + cbhds_monthly
 
-    all_years = set(vt_totals) | set(cbhds_totals)
-
-    data = []
-
-    for year in all_years:
-        if str(year).isdigit():
-            data.append((
-                int(year),
-                vt_totals.get(year, 0),
-                cbhds_totals.get(year, 0)
-            ))
-
-    df = pd.DataFrame(
-        data,
-        columns=["Fiscal Year", "VT", "CBHDS"]
-    ).sort_values("Fiscal Year")
-
-    return df
+    return pd.DataFrame({
+        "Fiscal Year": sorted(set(vt_totals) | set(cbhds_totals)),
+        "VT": [vt_totals.get(y, 0) for y in sorted(set(vt_totals) | set(cbhds_totals))],
+        "CBHDS": [cbhds_totals.get(y, 0) for y in sorted(set(vt_totals) | set(cbhds_totals))]
+    })
 
 from datetime import datetime
 
@@ -589,33 +557,25 @@ grants_pending = grants_pending[
     grants_pending["status_clean"].str.contains("pending", na=False)
 ]
 
-pending_clean = grants_pending.copy()
+grants_pending = grants_pending.loc[:, ~grants_pending.columns.str.contains("^Unnamed")]
 
-pending_clean["Start Date"] = pd.to_datetime(pending_clean["Start Date"], errors="coerce")
+grants_pending["Start Date"] = pd.to_datetime(grants_pending["Start Date"], errors="coerce")
 
-pending_clean["Project Duration (# of Months)"] = pd.to_numeric(
-    pending_clean["Project Duration (# of Months)"],
+grants_pending["Project Duration (# of Months)"] = pd.to_numeric(
+    grants_pending["Project Duration (# of Months)"],
     errors="coerce"
 )
 
-pending_clean["Total Directs to VT"] = (
-    pending_clean["Total Directs to VT"]
-    .astype(str)
-    .str.replace("$", "", regex=False)
-    .str.replace(",", "", regex=False)
-)
+for col in ["Total Directs to VT", "Total Directs to CBHDS"]:
+    grants_pending[col] = (
+        grants_pending[col]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+    grants_pending[col] = pd.to_numeric(grants_pending[col], errors="coerce")
 
-pending_clean["Total Directs to CBHDS"] = (
-    pending_clean["Total Directs to CBHDS"]
-    .astype(str)
-    .str.replace("$", "", regex=False)
-    .str.replace(",", "", regex=False)
-)
-
-pending_clean["Total Directs to VT"] = pd.to_numeric(pending_clean["Total Directs to VT"], errors="coerce")
-pending_clean["Total Directs to CBHDS"] = pd.to_numeric(pending_clean["Total Directs to CBHDS"], errors="coerce")
-
-pending_clean = pending_clean.dropna(
+grants_pending = grants_pending.dropna(
     subset=[
         "Start Date",
         "Project Duration (# of Months)",
@@ -624,10 +584,7 @@ pending_clean = pending_clean.dropna(
     ]
 )
 
-st.write("Pending rows BEFORE allocation:", len(pending_clean))
-st.write(pending_clean["status_clean"].value_counts())
-
-pending_df = load_pending_data(pending_clean)
+pending_df = get_pending_funding_by_fy(grants_pending)
 
 pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
