@@ -459,7 +459,27 @@ final_df["External CBHDS Funding"] = (
     final_df["Grants CBHDS"] + final_df["Contracts CBHDS"]
 )
 
-final_df["FY Label"] = final_df["Fiscal Year"].apply(lambda x: f"FY{int(x)%100}")
+from datetime import datetime
+
+today = datetime.today()
+current_fy = today.year + 1 if today.month >= 7 else today.year
+
+# force numeric + drop garbage years
+final_df["Fiscal Year"] = pd.to_numeric(final_df["Fiscal Year"], errors="coerce")
+final_df = final_df.dropna(subset=["Fiscal Year"])
+
+# remove impossible years (adjust lower bound if needed)
+final_df = final_df[
+    (final_df["Fiscal Year"] >= 2019) &
+    (final_df["Fiscal Year"] <= current_fy)
+]
+
+# sort so last bar is current FY
+final_df = final_df.sort_values("Fiscal Year")
+
+final_df["FY Label"] = final_df["Fiscal Year"].apply(
+    lambda x: f"FY{int(x) % 100}"
+)
 
 from datetime import datetime
 
@@ -837,3 +857,35 @@ ax6.set_title("CBHDS Funding and Salary Expenses")
 ax6.legend()
 
 st.pyplot(fig6)
+
+# compute totals per FY (for labeling full stack)
+totals = (
+    final_df["Internal Funding"] +
+    final_df["Statistics (COS)"] +
+    final_df["External CBHDS Funding"]
+)
+
+for i, total in enumerate(totals):
+    if total > 0:
+        ax6.text(
+            i - width/2,
+            total / 2,
+            f"${total/1e6:.1f}M",
+            ha='center',
+            va='center',
+            fontsize=8,
+            color='white'
+        )
+
+# salary labels (right bars)
+for i, sal in enumerate(final_df["Salary Expenses"]):
+    if sal > 0:
+        ax6.text(
+            i + width/2,
+            sal / 2,
+            f"${sal/1e6:.1f}M",
+            ha='center',
+            va='center',
+            fontsize=8,
+            color='white'
+        )
