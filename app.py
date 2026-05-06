@@ -626,10 +626,6 @@ pending_clean = pending_clean.dropna(
 
 pending_df = load_pending_data(pending_clean)
 
-pending_df = pending_df[
-    pending_df["Fiscal Year"] >= current_fy
-]
-
 pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
