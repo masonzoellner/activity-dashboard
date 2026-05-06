@@ -624,14 +624,8 @@ pending_clean = pending_clean.dropna(
     ]
 )
 
-status_col = pending_clean.columns[1]
-
-pending_clean["status_clean"] = (
-    pending_clean[status_col]
-    .astype(str)
-    .str.strip()
-    .str.lower()
-)
+st.write("Pending rows BEFORE allocation:", len(pending_clean))
+st.write(pending_clean["status_clean"].value_counts())
 
 pending_df = load_pending_data(pending_clean)
 
