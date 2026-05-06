@@ -306,17 +306,15 @@ def load_funding_data():
 
 @st.cache_data(ttl=3600)
 def load_salaries():
-    df = load_sheet("Salaries")
-
-    df = df.copy()
+    df = load_sheet("Salaries").copy()
 
     # First column is FY label
     df.rename(columns={df.columns[0]: "FY"}, inplace=True)
 
-    # Clean all money cells
+    # Clean money cells
     def clean_cell(x):
         try:
-            x = str(x).split("/")[0]  # take value before "/"
+            x = str(x).split("/")[0]
             x = x.replace("$", "").replace(",", "").strip()
             return float(x) if x not in ["", "nan"] else 0.0
         except:
@@ -325,13 +323,22 @@ def load_salaries():
     for col in df.columns[1:]:
         df[col] = df[col].apply(clean_cell)
 
-    # Sum across all columns for each FY
-    df["Salary Expenses"] = df.iloc[:, 1:].sum(axis=1)
+    # ❗ DROP Shared Costs
+    if "Shared Costs" in df.columns:
+        df_no_shared = df.drop(columns=["Shared Costs"])
+    else:
+        df_no_shared = df
 
-    # Extract FY number
+    # Salary total (excluding shared)
+    df["Salary Expenses"] = df_no_shared.iloc[:, 1:].sum(axis=1)
+
+    # Alexandra Hanlon column ONLY
+    df["Statistics (COS)"] = df.get("Alexandra Hanlon", 0)
+
+    # Extract FY
     df["Fiscal Year"] = df["FY"].str.extract(r"(\d+)").astype(int)
 
-    return df[["Fiscal Year", "Salary Expenses"]]
+    return df[["Fiscal Year", "Salary Expenses", "Statistics (COS)"]]
 
 
 # -----------------------------
@@ -367,14 +374,22 @@ funded_summary = funded_only.groupby("Fiscal Year").agg({
 
 # Load salaries
 salary_df = load_salaries()
+internal_df = get_internal_funding_by_fy()
+grants_cbhds_df = get_grants_cbhds_by_fy(grants)
+contracts_cbhds_df = get_contracts_cbhds_by_fy()
 
-# Merge all data
-final_df = funding_df.merge(funded_summary, on="Fiscal Year", how="left")
-final_df = final_df.merge(salary_df, on="Fiscal Year", how="left")
+# Merge all
+final_df = internal_df.merge(grants_cbhds_df, on="Fiscal Year", how="outer")
+final_df = final_df.merge(contracts_cbhds_df, on="Fiscal Year", how="outer")
+final_df = final_df.merge(salary_df, on="Fiscal Year", how="outer")
 
 final_df = final_df.fillna(0)
 
-# Labels
+# Combine top stack
+final_df["External CBHDS Funding"] = (
+    final_df["Grants CBHDS"] + final_df["Contracts CBHDS"]
+)
+
 final_df["FY Label"] = final_df["Fiscal Year"].apply(lambda x: f"FY{int(x)%100}")
 
 from datetime import datetime
@@ -706,38 +721,112 @@ st.pyplot(fig5)
 
 st.subheader("CBHDS Funding and Salary Expenses")
 
+def get_internal_funding_by_fy():
+    internal = load_sheet("Internal Funding").copy()
+    internal.columns = internal.columns.str.strip()
+
+    internal["Start Date"] = pd.to_datetime(internal["Start Date"], errors="coerce")
+    internal["End Date"] = pd.to_datetime(internal["End Date"], errors="coerce")
+
+    def clean_money(x):
+        try:
+            return float(str(x).replace("$", "").replace(",", "").strip())
+        except:
+            return 0.0
+
+    internal["Total Funds ($)"] = internal["Total Funds ($)"].apply(clean_money)
+
+    totals = {}
+
+    for _, row in internal.iterrows():
+        start = row["Start Date"]
+        end = row["End Date"]
+        total = row["Total Funds ($)"]
+
+        if pd.isna(start) or pd.isna(end) or total <= 0:
+            continue
+
+        duration_months = max(1, (end.year - start.year) * 12 + (end.month - start.month))
+
+        monthly = total / duration_months
+
+        for m in range(duration_months):
+            date = start + pd.DateOffset(months=m)
+            fy = get_fiscal_year(date)
+            totals[fy] = totals.get(fy, 0) + monthly
+
+    return pd.DataFrame(
+        [(k, v) for k, v in totals.items()],
+        columns=["Fiscal Year", "Internal Funding"]
+    )
+
+def get_grants_cbhds_by_fy(grants):
+    df = grants.copy()
+
+    df = df[df["status_clean"].str.contains("funded", na=False)]
+
+    df["Total Directs to CBHDS"] = (
+        df["Total Directs to CBHDS"]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
+
+    df["Start Date"] = pd.to_datetime(df["Start Date"], errors="coerce")
+
+    df["Fiscal Year"] = df["Start Date"].apply(
+        lambda x: get_fiscal_year(x) if pd.notna(x) else None
+    )
+
+    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Grants CBHDS")
+
+def get_contracts_cbhds_by_fy():
+    df = load_sheet("Contracts/IPAs/TAPs").copy()
+    df.columns = df.columns.str.strip()
+
+    df["Total Directs to CBHDS"] = (
+        df["Total Directs to CBHDS"]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
+
+    df["Fiscal Year"] = pd.to_numeric(df["Fiscal Year"], errors="coerce")
+
+    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Contracts CBHDS")
+
 fig6, ax6 = plt.subplots()
 
 x = range(len(final_df))
-
-# Width for side-by-side bars
 width = 0.35
 
-# Left bar (stacked funding)
+# LEFT STACK (3 components)
 ax6.bar(
     [i - width/2 for i in x],
-    final_df["Total Directs to VT"],
+    final_df["Internal Funding"],
     width,
-    label="VT Directs"
+    label="Internal Funding"
 )
 
 ax6.bar(
     [i - width/2 for i in x],
-    final_df["Total Directs to CBHDS"],
+    final_df["Statistics (COS)"],
     width,
-    bottom=final_df["Total Directs to VT"],
-    label="CBHDS Directs"
+    bottom=final_df["Internal Funding"],
+    label="Statistics (COS)"
 )
 
 ax6.bar(
     [i - width/2 for i in x],
-    final_df["Funding"],
+    final_df["External CBHDS Funding"],
     width,
-    bottom=final_df["Total Directs to VT"] + final_df["Total Directs to CBHDS"],
-    label="Sponsored Funding"
+    bottom=final_df["Internal Funding"] + final_df["Statistics (COS)"],
+    label="External CBHDS Funding"
 )
 
-# Right bar (salary)
+# RIGHT BAR (salary)
 ax6.bar(
     [i + width/2 for i in x],
     final_df["Salary Expenses"],
@@ -751,7 +840,7 @@ ax6.set_xticklabels(final_df["FY Label"])
 
 ax6.set_xlabel("Fiscal Year")
 ax6.set_ylabel("Amount ($)")
-ax6.set_title("CBHDS Funding vs Salary Expenses")
+ax6.set_title("CBHDS Funding and Salary Expenses")
 
 ax6.legend()
 
