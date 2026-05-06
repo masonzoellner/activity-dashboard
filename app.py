@@ -589,7 +589,42 @@ grants_pending = grants_pending[
     grants_pending["status_clean"].str.contains("pending", na=False)
 ]
 
-pending_df = load_pending_data(grants_pending)
+pending_clean = grants_pending.copy()
+
+pending_clean["Start Date"] = pd.to_datetime(pending_clean["Start Date"], errors="coerce")
+
+pending_clean["Project Duration (# of Months)"] = pd.to_numeric(
+    pending_clean["Project Duration (# of Months)"],
+    errors="coerce"
+)
+
+pending_clean["Total Directs to VT"] = (
+    pending_clean["Total Directs to VT"]
+    .astype(str)
+    .str.replace("$", "", regex=False)
+    .str.replace(",", "", regex=False)
+)
+
+pending_clean["Total Directs to CBHDS"] = (
+    pending_clean["Total Directs to CBHDS"]
+    .astype(str)
+    .str.replace("$", "", regex=False)
+    .str.replace(",", "", regex=False)
+)
+
+pending_clean["Total Directs to VT"] = pd.to_numeric(pending_clean["Total Directs to VT"], errors="coerce")
+pending_clean["Total Directs to CBHDS"] = pd.to_numeric(pending_clean["Total Directs to CBHDS"], errors="coerce")
+
+pending_clean = pending_clean.dropna(
+    subset=[
+        "Start Date",
+        "Project Duration (# of Months)",
+        "Total Directs to VT",
+        "Total Directs to CBHDS"
+    ]
+)
+
+pending_df = load_pending_data(pending_clean)
 
 pending_df = pending_df[
     pending_df["Fiscal Year"] >= current_fy
