@@ -856,8 +856,6 @@ ax6.set_title("CBHDS Funding and Salary Expenses")
 
 ax6.legend()
 
-st.pyplot(fig6)
-
 # compute totals per FY (for labeling full stack)
 totals = (
     final_df["Internal Funding"] +
@@ -889,3 +887,5 @@ for i, sal in enumerate(final_df["Salary Expenses"]):
             fontsize=8,
             color='white'
         )
+
+st.pyplot(fig6)
