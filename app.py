@@ -867,12 +867,12 @@ for i, total in enumerate(totals):
     if total > 0:
         ax6.text(
             i - width/2,
-            total / 2,
+            total,
             f"${total/1e6:.1f}M",
             ha='center',
-            va='center',
-            fontsize=8,
-            color='white'
+            va='bottom',
+            fontsize=9,
+            fontweight='bold'
         )
 
 # salary labels (right bars)
