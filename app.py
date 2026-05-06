@@ -856,39 +856,34 @@ ax6.set_title("CBHDS Funding and Salary Expenses")
 
 ax6.legend()
 
-# compute totals per FY (for labeling full stack)
-totals = (
+stack_totals = (
     final_df["Internal Funding"] +
     final_df["Statistics (COS)"] +
     final_df["External CBHDS Funding"]
 )
 
-for i, total in enumerate(totals):
+for i, total in enumerate(stack_totals):
     if total > 0:
         ax6.text(
             i - width/2,
-            total,
+            total * 1.01,   # slight offset above bar
             f"${total/1e6:.1f}M",
             ha='center',
             va='bottom',
-            fontsize=9,
+            fontsize=7,
             fontweight='bold'
         )
 
-# salary labels (right bars)
 for i, sal in enumerate(final_df["Salary Expenses"]):
     if sal > 0:
         ax6.text(
             i + width/2,
-            sal / 2,
+            sal * 1.01,   # top of bar
             f"${sal/1e6:.1f}M",
             ha='center',
-            va='center',
-            fontsize=8,
-            color='white'
+            va='bottom',
+            fontsize=7,
+            fontweight='bold'
         )
-
-st.pyplot(fig6)
-
 
 st.pyplot(fig6)
