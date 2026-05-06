@@ -372,6 +372,82 @@ funded_summary = funded_only.groupby("Fiscal Year").agg({
     "Total Directs to CBHDS": "sum"
 }).reset_index()
 
+def get_internal_funding_by_fy():
+    internal = load_sheet("Internal Funding").copy()
+    internal.columns = internal.columns.str.strip()
+
+    internal["Start Date"] = pd.to_datetime(internal["Start Date"], errors="coerce")
+    internal["End Date"] = pd.to_datetime(internal["End Date"], errors="coerce")
+
+    def clean_money(x):
+        try:
+            return float(str(x).replace("$", "").replace(",", "").strip())
+        except:
+            return 0.0
+
+    internal["Total Funds ($)"] = internal["Total Funds ($)"].apply(clean_money)
+
+    totals = {}
+
+    for _, row in internal.iterrows():
+        start = row["Start Date"]
+        end = row["End Date"]
+        total = row["Total Funds ($)"]
+
+        if pd.isna(start) or pd.isna(end) or total <= 0:
+            continue
+
+        duration_months = max(1, (end.year - start.year) * 12 + (end.month - start.month))
+
+        monthly = total / duration_months
+
+        for m in range(duration_months):
+            date = start + pd.DateOffset(months=m)
+            fy = get_fiscal_year(date)
+            totals[fy] = totals.get(fy, 0) + monthly
+
+    return pd.DataFrame(
+        [(k, v) for k, v in totals.items()],
+        columns=["Fiscal Year", "Internal Funding"]
+    )
+
+def get_grants_cbhds_by_fy(grants):
+    df = grants.copy()
+
+    df = df[df["status_clean"].str.contains("funded", na=False)]
+
+    df["Total Directs to CBHDS"] = (
+        df["Total Directs to CBHDS"]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
+
+    df["Start Date"] = pd.to_datetime(df["Start Date"], errors="coerce")
+
+    df["Fiscal Year"] = df["Start Date"].apply(
+        lambda x: get_fiscal_year(x) if pd.notna(x) else None
+    )
+
+    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Grants CBHDS")
+
+def get_contracts_cbhds_by_fy():
+    df = load_sheet("Contracts/IPAs/TAPs").copy()
+    df.columns = df.columns.str.strip()
+
+    df["Total Directs to CBHDS"] = (
+        df["Total Directs to CBHDS"]
+        .astype(str)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
+    )
+    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
+
+    df["Fiscal Year"] = pd.to_numeric(df["Fiscal Year"], errors="coerce")
+
+    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Contracts CBHDS")
+
 # Load salaries
 salary_df = load_salaries()
 internal_df = get_internal_funding_by_fy()
@@ -720,82 +796,6 @@ ax5.set_title("CBHDS Collaborations Over Time")
 st.pyplot(fig5)
 
 st.subheader("CBHDS Funding and Salary Expenses")
-
-def get_internal_funding_by_fy():
-    internal = load_sheet("Internal Funding").copy()
-    internal.columns = internal.columns.str.strip()
-
-    internal["Start Date"] = pd.to_datetime(internal["Start Date"], errors="coerce")
-    internal["End Date"] = pd.to_datetime(internal["End Date"], errors="coerce")
-
-    def clean_money(x):
-        try:
-            return float(str(x).replace("$", "").replace(",", "").strip())
-        except:
-            return 0.0
-
-    internal["Total Funds ($)"] = internal["Total Funds ($)"].apply(clean_money)
-
-    totals = {}
-
-    for _, row in internal.iterrows():
-        start = row["Start Date"]
-        end = row["End Date"]
-        total = row["Total Funds ($)"]
-
-        if pd.isna(start) or pd.isna(end) or total <= 0:
-            continue
-
-        duration_months = max(1, (end.year - start.year) * 12 + (end.month - start.month))
-
-        monthly = total / duration_months
-
-        for m in range(duration_months):
-            date = start + pd.DateOffset(months=m)
-            fy = get_fiscal_year(date)
-            totals[fy] = totals.get(fy, 0) + monthly
-
-    return pd.DataFrame(
-        [(k, v) for k, v in totals.items()],
-        columns=["Fiscal Year", "Internal Funding"]
-    )
-
-def get_grants_cbhds_by_fy(grants):
-    df = grants.copy()
-
-    df = df[df["status_clean"].str.contains("funded", na=False)]
-
-    df["Total Directs to CBHDS"] = (
-        df["Total Directs to CBHDS"]
-        .astype(str)
-        .str.replace("$", "", regex=False)
-        .str.replace(",", "", regex=False)
-    )
-    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
-
-    df["Start Date"] = pd.to_datetime(df["Start Date"], errors="coerce")
-
-    df["Fiscal Year"] = df["Start Date"].apply(
-        lambda x: get_fiscal_year(x) if pd.notna(x) else None
-    )
-
-    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Grants CBHDS")
-
-def get_contracts_cbhds_by_fy():
-    df = load_sheet("Contracts/IPAs/TAPs").copy()
-    df.columns = df.columns.str.strip()
-
-    df["Total Directs to CBHDS"] = (
-        df["Total Directs to CBHDS"]
-        .astype(str)
-        .str.replace("$", "", regex=False)
-        .str.replace(",", "", regex=False)
-    )
-    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
-
-    df["Fiscal Year"] = pd.to_numeric(df["Fiscal Year"], errors="coerce")
-
-    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Contracts CBHDS")
 
 fig6, ax6 = plt.subplots()
 
