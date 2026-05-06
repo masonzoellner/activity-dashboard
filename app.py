@@ -592,6 +592,14 @@ grants_pending = grants_pending.dropna(
     ]
 )
 
+st.write("Pending raw rows:", len(grants_pending))
+st.write(grants_pending[[
+    "status_clean",
+    "Total Directs to VT",
+    "Total Directs to CBHDS",
+    "Project Duration (# of Months)"
+]].head(10))
+
 pending_df = get_pending_funding_by_fy(grants_pending)
 
 pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
