@@ -21,7 +21,7 @@ def load_publications():
 
 df = load_publications()
 
-st.title("CBHDS Publications Dashboard")
+st.title("CBHDS Activity Dashboard")
 
 min_date = df["pub_date"].min().date()
 today = date.today()
