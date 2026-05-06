@@ -412,41 +412,34 @@ def get_internal_funding_by_fy():
     )
 
 def get_grants_cbhds_by_fy(grants):
-    df = grants.copy()
-
-    df = df[df["status_clean"].str.contains("funded", na=False)]
-
-    df["Total Directs to CBHDS"] = (
-        df["Total Directs to CBHDS"]
-        .astype(str)
-        .str.replace("$", "", regex=False)
-        .str.replace(",", "", regex=False)
+    return pd.DataFrame(
+        list(
+            allocate_funding(
+                grants,
+                "Total Directs to CBHDS",
+                "Project Duration (# of Months)",
+                "Start Date",
+                dataset_type="grants"
+            ).items()
+        ),
+        columns=["Fiscal Year", "Grants CBHDS"]
     )
-    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
-
-    df["Start Date"] = pd.to_datetime(df["Start Date"], errors="coerce")
-
-    df["Fiscal Year"] = df["Start Date"].apply(
-        lambda x: get_fiscal_year(x) if pd.notna(x) else None
-    )
-
-    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Grants CBHDS")
 
 def get_contracts_cbhds_by_fy():
-    df = load_sheet("Contracts/IPAs/TAPs").copy()
-    df.columns = df.columns.str.strip()
-
-    df["Total Directs to CBHDS"] = (
-        df["Total Directs to CBHDS"]
-        .astype(str)
-        .str.replace("$", "", regex=False)
-        .str.replace(",", "", regex=False)
+    contracts = load_sheet("Contracts/IPAs/TAPs")
+    
+    return pd.DataFrame(
+        list(
+            allocate_funding(
+                contracts,
+                "Total Directs to CBHDS",
+                "Project Duration (# of Months)",
+                "Start Date",
+                dataset_type="contracts"
+            ).items()
+        ),
+        columns=["Fiscal Year", "Contracts CBHDS"]
     )
-    df["Total Directs to CBHDS"] = pd.to_numeric(df["Total Directs to CBHDS"], errors="coerce")
-
-    df["Fiscal Year"] = pd.to_numeric(df["Fiscal Year"], errors="coerce")
-
-    return df.groupby("Fiscal Year")["Total Directs to CBHDS"].sum().reset_index(name="Contracts CBHDS")
 
 # Load salaries
 salary_df = load_salaries()
