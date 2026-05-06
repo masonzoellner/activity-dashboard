@@ -521,14 +521,22 @@ def get_pending_funding_by_fy(df):
 
     for _, row in df.iterrows():
 
-        vt_total = clean_money(row["Total Directs to VT"])
-        cbhds_total = clean_money(row["Total Directs to CBHDS"])
+        vt_total = row["Total Directs to VT"]
+        cbhds_total = row["Total Directs to CBHDS"]
 
-        duration = int(row["Project Duration (# of Months)"])
-        start = pd.to_datetime(row["Start Date"], errors="coerce")
+        duration = row["Project Duration (# of Months)"]
+        start = row["Start Date"]
 
-        if pd.isna(start) or duration <= 0:
+        if pd.isna(start) or pd.isna(duration):
             continue
+
+        duration = int(duration)
+
+        if duration <= 0:
+            continue
+
+        vt_total = 0 if pd.isna(vt_total) else float(vt_total)
+        cbhds_total = 0 if pd.isna(cbhds_total) else float(cbhds_total)
 
         vt_monthly = vt_total / duration
         cbhds_monthly = cbhds_total / duration
