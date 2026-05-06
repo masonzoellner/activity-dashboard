@@ -624,6 +624,15 @@ pending_clean = pending_clean.dropna(
     ]
 )
 
+status_col = pending_clean.columns[1]
+
+pending_clean["status_clean"] = (
+    pending_clean[status_col]
+    .astype(str)
+    .str.strip()
+    .str.lower()
+)
+
 pending_df = load_pending_data(pending_clean)
 
 pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
