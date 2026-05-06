@@ -814,7 +814,37 @@ fig6, ax6 = plt.subplots()
 x = range(len(final_df))
 width = 0.35
 
+# LEFT STACK (3 components)
+ax6.bar(
+    [i - width/2 for i in x],
+    final_df["Internal Funding"],
+    width,
+    label="Internal Funding"
+)
 
+ax6.bar(
+    [i - width/2 for i in x],
+    final_df["Statistics (COS)"],
+    width,
+    bottom=final_df["Internal Funding"],
+    label="Statistics (COS)"
+)
+
+ax6.bar(
+    [i - width/2 for i in x],
+    final_df["External CBHDS Funding"],
+    width,
+    bottom=final_df["Internal Funding"] + final_df["Statistics (COS)"],
+    label="External CBHDS Funding"
+)
+
+# RIGHT BAR (salary)
+ax6.bar(
+    [i + width/2 for i in x],
+    final_df["Salary Expenses"],
+    width,
+    label="Salary Expenses"
+)
 
 # Labels
 ax6.set_xticks(x)
@@ -832,6 +862,33 @@ totals = (
     final_df["Statistics (COS)"] +
     final_df["External CBHDS Funding"]
 )
+
+for i, total in enumerate(totals):
+    if total > 0:
+        ax6.text(
+            i - width/2,
+            total / 2,
+            f"${total/1e6:.1f}M",
+            ha='center',
+            va='center',
+            fontsize=8,
+            color='white'
+        )
+
+# salary labels (right bars)
+for i, sal in enumerate(final_df["Salary Expenses"]):
+    if sal > 0:
+        ax6.text(
+            i + width/2,
+            sal / 2,
+            f"${sal/1e6:.1f}M",
+            ha='center',
+            va='center',
+            fontsize=8,
+            color='white'
+        )
+
+st.pyplot(fig6)
 
 
 st.pyplot(fig6)
