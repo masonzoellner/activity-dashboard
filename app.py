@@ -815,18 +815,6 @@ ax5.set_title("CBHDS Collaborations Over Time")
 
 #st.pyplot(fig5)
 
-st.subheader("Current Totals")
-
-total_dropins = int(combined_activity["Drop-ins"].sum())
-total_collabs = int(combined_activity["Collaborations"].sum())
-
-summary_df = pd.DataFrame({
-    "Metric": ["Total Drop-ins", "Total Collaborations"],
-    "Count": [total_dropins, total_collabs]
-})
-
-st.table(summary_df)
-
 # Merge datasets
 combined_activity = pd.merge(
     dropins_df[["Fiscal Year", "Drop-ins"]],
@@ -836,14 +824,6 @@ combined_activity = pd.merge(
 ).fillna(0)
 
 st.subheader("Drop-ins and Collaborations by Fiscal Year")
-
-# Merge datasets
-combined_activity = pd.merge(
-    dropins_df[["Fiscal Year", "Drop-ins"]],
-    collab_df[["Fiscal Year", "Collaborations"]],
-    on="Fiscal Year",
-    how="outer"
-).fillna(0)
 
 combined_activity = combined_activity.sort_values("Fiscal Year")
 
@@ -887,10 +867,6 @@ st.pyplot(fig_activity)
 # -----------------------------
 # Current totals
 # -----------------------------
-st.subheader("Current Totals")
-
-total_dropins = int(combined_activity["Drop-ins"].sum())
-total_collabs = int(combined_activity["Collaborations"].sum())
 
 col1, col2 = st.columns(2)
 
