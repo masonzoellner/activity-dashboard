@@ -868,13 +868,18 @@ st.pyplot(fig_activity)
 # Current totals
 # -----------------------------
 
+st.subheader("Current Totals")
+
+total_dropins = dropins_df["Drop-ins"].sum()
+total_collabs = collab_df["Collaborations"].sum()
+
 col1, col2 = st.columns(2)
 
 with col1:
-    st.metric("Total Drop-ins", total_dropins)
+    st.metric("Total Drop-ins", int(total_dropins))
 
 with col2:
-    st.metric("Total Collaborations", total_collabs)
+    st.metric("Total Collaborations", int(total_collabs))
 
 st.subheader("CBHDS Funding and Salary Expenses")
 
