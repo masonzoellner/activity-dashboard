@@ -516,7 +516,7 @@ for x, y in zip(funding_df["FY Label"], funding_df["Funding"]):
     ax2.text(
         x,
         y,
-        f"${y/1e6:.1f}M",
+        f"${y:,.0f}",
         ha='center',
         va='bottom',
         fontsize=9
