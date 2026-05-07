@@ -10,7 +10,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import date, timedelta
 from pubmed_publications import get_pubmed_publications
+from matplotlib.ticker import FuncFormatter
 
+def money_formatter(x, pos):
+    return f'${x:,.0f}'
 
 @st.cache_data(ttl=86400)
 def load_publications():
@@ -523,6 +526,8 @@ ax2.set_xlabel("Fiscal Year")
 ax2.set_ylabel("Total Funding ($)")
 ax2.set_title("Sponsored CBHDS Research Funding")
 
+ax2.yaxis.set_major_formatter(FuncFormatter(money_formatter))
+
 st.pyplot(fig2)
 
 def clean_money(value):
@@ -620,7 +625,7 @@ pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
 
 st.subheader("Pending Funding")
 
-fig3, ax3 = plt.subplots()
+fig3, ax3 = plt.subplots(figsize=(12, 8))
 
 ax3.bar(
     pending_df["FY Label"],
@@ -666,6 +671,9 @@ ax3.set_ylabel("Funding ($)")
 ax3.set_title("Pending CBHDS Research Funding")
 
 ax3.legend()
+
+ax3.margins(y=0.15)
+fig3.tight_layout()
 
 st.pyplot(fig3)
 
@@ -732,7 +740,7 @@ ax4.set_xlabel("Fiscal Year")
 ax4.set_ylabel("Number of Drop-ins")
 ax4.set_title("CBHDS Drop-ins Over Time")
 
-st.pyplot(fig4)
+#st.pyplot(fig4)
 
 API_TOKEN_COLLAB_1 = "5A3187A0A0C21BCC63B98BE56C08F197"
 API_TOKEN_COLLAB_2 = "B6FB83BC6AA3DEA43B9B4B69DB9C4F98"
@@ -805,7 +813,68 @@ ax5.set_xlabel("Fiscal Year")
 ax5.set_ylabel("Number of Collaborations")
 ax5.set_title("CBHDS Collaborations Over Time")
 
-st.pyplot(fig5)
+#st.pyplot(fig5)
+
+st.subheader("Drop-ins and Collaborations by Fiscal Year")
+
+st.subheader("Current Totals")
+
+total_dropins = int(combined_activity["Drop-ins"].sum())
+total_collabs = int(combined_activity["Collaborations"].sum())
+
+summary_df = pd.DataFrame({
+    "Metric": ["Total Drop-ins", "Total Collaborations"],
+    "Count": [total_dropins, total_collabs]
+})
+
+st.table(summary_df)
+
+# Merge datasets
+combined_activity = pd.merge(
+    dropins_df[["Fiscal Year", "Drop-ins"]],
+    collab_df[["Fiscal Year", "Collaborations"]],
+    on="Fiscal Year",
+    how="outer"
+).fillna(0)
+
+combined_activity = combined_activity.sort_values("Fiscal Year")
+
+combined_activity["FY Label"] = combined_activity["Fiscal Year"].apply(
+    lambda x: f"FY{int(x) % 100}"
+)
+
+fig_activity, ax_activity = plt.subplots(figsize=(12, 6))
+
+# Drop-ins
+ax_activity.plot(
+    combined_activity["FY Label"],
+    combined_activity["Drop-ins"],
+    marker='o',
+    label="Drop-ins"
+)
+
+# Collaborations
+ax_activity.plot(
+    combined_activity["FY Label"],
+    combined_activity["Collaborations"],
+    marker='o',
+    label="Collaborations"
+)
+
+# Labels
+for x, y in zip(combined_activity["FY Label"], combined_activity["Drop-ins"]):
+    ax_activity.text(x, y, str(int(y)), fontsize=8)
+
+for x, y in zip(combined_activity["FY Label"], combined_activity["Collaborations"]):
+    ax_activity.text(x, y, str(int(y)), fontsize=8)
+
+ax_activity.set_xlabel("Fiscal Year")
+ax_activity.set_ylabel("Count")
+ax_activity.set_title("CBHDS Drop-ins and Collaborations Over Time")
+
+ax_activity.legend()
+
+st.pyplot(fig_activity)
 
 st.subheader("CBHDS Funding and Salary Expenses")
 
@@ -853,6 +922,8 @@ ax6.set_xticklabels(final_df["FY Label"])
 ax6.set_xlabel("Fiscal Year")
 ax6.set_ylabel("Amount ($)")
 ax6.set_title("CBHDS Funding and Salary Expenses")
+
+ax6.yaxis.set_major_formatter(FuncFormatter(money_formatter))
 
 ax6.legend()
 
