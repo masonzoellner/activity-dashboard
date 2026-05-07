@@ -720,7 +720,6 @@ def process_dropins(df):
 
     return counts
 
-st.subheader("Drop-ins by Fiscal Year")
 
 dropins_df = process_dropins(load_redcap_data())
 
@@ -790,7 +789,6 @@ def process_collaborations(df1, df2):
 
     return counts
 
-st.subheader("Collaborations by Fiscal Year")
 
 df1 = load_collab_data(API_TOKEN_COLLAB_1)
 df2 = load_collab_data(API_TOKEN_COLLAB_2)
