@@ -642,29 +642,48 @@ ax3.bar(
 
 for i, (vt, cbhds) in enumerate(zip(pending_df["VT"], pending_df["CBHDS"])):
 
-    # Label for VT (bottom bar)
+    # VT label (inside blue bar)
     if vt > 0:
         ax3.text(
             i,
-            vt / 2,  # middle of VT bar
+            vt / 2,
             f"${vt/1e6:.1f}M",
             ha='center',
             va='center',
-            fontsize=8,
-            color='white'
+            fontsize=10,
+            color='white',
+            fontweight='bold'
         )
 
-    # Label for CBHDS (top bar)
+    # CBHDS label
     if cbhds > 0:
-        ax3.text(
-            i,
-            vt + (cbhds / 2),  # middle of CBHDS segment
-            f"${cbhds/1e6:.1f}M",
-            ha='center',
-            va='center',
-            fontsize=8,
-            color='white'
-        )
+
+        # If tiny segment, place ABOVE bar in black
+        if cbhds < 100000:   # 0.1M
+
+            ax3.text(
+                i,
+                vt + cbhds + (max(pending_df["VT"]) * 0.01),
+                f"${cbhds/1e6:.1f}M",
+                ha='center',
+                va='bottom',
+                fontsize=10,
+                color='black',
+                fontweight='bold'
+            )
+
+        # Otherwise place inside orange bar
+        else:
+            ax3.text(
+                i,
+                vt + (cbhds / 2),
+                f"${cbhds/1e6:.1f}M",
+                ha='center',
+                va='center',
+                fontsize=10,
+                color='white',
+                fontweight='bold'
+            )
 
 ax3.set_xlabel("Fiscal Year")
 ax3.set_ylabel("Funding ($)")
