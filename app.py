@@ -1022,7 +1022,7 @@ for i, sal in enumerate(final_df["Salary Expenses"]):
             f"${sal/1e6:.1f}M",
             ha='center',
             va='bottom',
-            fontsize=7,
+            fontsize=DATA_LABEL_SIZE,
             fontweight='bold'
         )
 
