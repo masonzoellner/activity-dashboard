@@ -15,6 +15,15 @@ from matplotlib.ticker import FuncFormatter
 def money_formatter(x, pos):
     return f'${x:,.0f}'
 
+# -----------------------------
+# GLOBAL PLOT FONT SIZES
+# -----------------------------
+TITLE_SIZE = 16
+LABEL_SIZE = 13
+TICK_SIZE = 11
+POINT_LABEL_SIZE = 11
+LEGEND_SIZE = 11
+
 @st.cache_data(ttl=86400)
 def load_publications():
     df = get_pubmed_publications()
@@ -83,10 +92,11 @@ fte_plot.plot(
     ax=ax
 )
 
-ax.set_xlabel("Semester")
-ax.set_ylabel("Total FTE")
-ax.set_title("CBHDS FTE Growth Over Time")
-ax.legend(title="Role", bbox_to_anchor=(1.05, 1))
+ax.set_xlabel("Semester", fontsize=LABEL_SIZE)
+ax.set_ylabel("Total FTE", fontsize=LABEL_SIZE)
+ax.set_title("CBHDS FTE Growth Over Time", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax.legend(title="Role", bbox_to_anchor=(1.05, 1), fontsize=LEGEND_SIZE)
 
 st.pyplot(fig)
 
@@ -522,9 +532,10 @@ for x, y in zip(funding_df["FY Label"], funding_df["Funding"]):
         fontsize=9
     )
 
-ax2.set_xlabel("Fiscal Year")
-ax2.set_ylabel("Total Funding ($)")
-ax2.set_title("Sponsored CBHDS Research Funding")
+ax2.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
+ax2.set_ylabel("Total Funding ($)", fontsize=LABEL_SIZE)
+ax2.set_title("Sponsored CBHDS Research Funding", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax2.yaxis.set_major_formatter(FuncFormatter(money_formatter))
 
@@ -685,11 +696,12 @@ for i, (vt, cbhds) in enumerate(zip(pending_df["VT"], pending_df["CBHDS"])):
                 fontweight='bold'
             )
 
-ax3.set_xlabel("Fiscal Year")
-ax3.set_ylabel("Funding ($)")
-ax3.set_title("Pending CBHDS Research Funding")
+ax3.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
+ax3.set_ylabel("Funding ($)", fontsize=LABEL_SIZE)
+ax3.set_title("Pending CBHDS Research Funding", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
-ax3.legend()
+ax3.legend(fontsize=LEGEND_SIZE)
 
 ax3.margins(y=0.15)
 fig3.tight_layout()
@@ -752,11 +764,20 @@ ax4.plot(
 
 # Labels on points
 for x, y in zip(dropins_df["FY Label"], dropins_df["Drop-ins"]):
-    ax4.text(x, y, str(int(y)), ha='center', va='bottom')
+    ax4.text(
+        x,
+        y,
+        str(int(y)),
+        ha='center',
+        va='bottom',
+        fontsize=POINT_LABEL_SIZE,
+        fontweight='bold'
+    )
 
-ax4.set_xlabel("Fiscal Year")
-ax4.set_ylabel("Number of Drop-ins")
-ax4.set_title("CBHDS Drop-ins Over Time")
+ax4.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
+ax4.set_ylabel("Number of Drop-ins", fontsize=LABEL_SIZE)
+ax4.set_title("CBHDS Drop-ins Over Time", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
 #st.pyplot(fig4)
 
@@ -824,11 +845,20 @@ ax5.plot(
 
 # Labels on points
 for x, y in zip(collab_df["FY Label"], collab_df["Collaborations"]):
-    ax5.text(x, y, str(int(y)), ha='center', va='bottom')
+    ax5.text(
+        x,
+        y,
+        str(int(y)),
+        ha='center',
+        va='bottom',
+        fontsize=POINT_LABEL_SIZE,
+        fontweight='bold'
+    )
 
-ax5.set_xlabel("Fiscal Year")
-ax5.set_ylabel("Number of Collaborations")
-ax5.set_title("CBHDS Collaborations Over Time")
+ax5.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
+ax5.set_ylabel("Number of Collaborations", fontsize=LABEL_SIZE)
+ax5.set_title("CBHDS Collaborations Over Time", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
 #st.pyplot(fig5)
 
@@ -868,16 +898,29 @@ ax_activity.plot(
 
 # Labels
 for x, y in zip(combined_activity["FY Label"], combined_activity["Drop-ins"]):
-    ax_activity.text(x, y, str(int(y)), fontsize=8)
+    ax_activity.text(
+        x,
+        y,
+        str(int(y)),
+        fontsize=POINT_LABEL_SIZE,
+        fontweight='bold'
+    )
 
 for x, y in zip(combined_activity["FY Label"], combined_activity["Collaborations"]):
-    ax_activity.text(x, y, str(int(y)), fontsize=8)
+    ax_activity.text(
+        x,
+        y,
+        str(int(y)),
+        fontsize=POINT_LABEL_SIZE,
+        fontweight='bold'
+    )
 
-ax_activity.set_xlabel("Fiscal Year")
-ax_activity.set_ylabel("Count")
-ax_activity.set_title("CBHDS Drop-ins and Collaborations Over Time")
+ax_activity.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
+ax_activity.set_ylabel("Count", fontsize=LABEL_SIZE)
+ax_activity.set_title("CBHDS Drop-ins and Collaborations Over Time", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
-ax_activity.legend()
+ax_activity.legend(fontsize=LEGEND_SIZE)
 
 st.pyplot(fig_activity)
 
@@ -941,13 +984,14 @@ ax6.bar(
 ax6.set_xticks(x)
 ax6.set_xticklabels(final_df["FY Label"])
 
-ax6.set_xlabel("Fiscal Year")
-ax6.set_ylabel("Amount ($)")
-ax6.set_title("CBHDS Funding and Salary Expenses")
+ax6.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
+ax6.set_ylabel("Amount ($)", fontsize=LABEL_SIZE)
+ax6.set_title("CBHDS Funding and Salary Expenses", fontsize=TITLE_SIZE, fontweight='bold')
+ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax6.yaxis.set_major_formatter(FuncFormatter(money_formatter))
 
-ax6.legend()
+ax6.legend(fontsize=LEGEND_SIZE)
 
 stack_totals = (
     final_df["Internal Funding"] +
