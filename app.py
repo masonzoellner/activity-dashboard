@@ -1025,3 +1025,4 @@ for i, sal in enumerate(final_df["Salary Expenses"]):
             fontsize=DATA_LABEL_SIZE,
             fontweight='bold'
         )
+st.pyplot(fig6)
