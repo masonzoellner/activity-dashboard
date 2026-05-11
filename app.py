@@ -18,11 +18,12 @@ def money_formatter(x, pos):
 # -----------------------------
 # GLOBAL PLOT FONT SIZES
 # -----------------------------
-TITLE_SIZE = 16
-LABEL_SIZE = 13
-TICK_SIZE = 11
-POINT_LABEL_SIZE = 11
-LEGEND_SIZE = 11
+TITLE_SIZE = 20
+LABEL_SIZE = 16
+TICK_SIZE = 14
+POINT_LABEL_SIZE = 12
+LEGEND_SIZE = 13
+
 FIG_WIDTH = 12
 FIG_HEIGHT = 6
 
