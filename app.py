@@ -535,7 +535,7 @@ for x, y in zip(funding_df["FY Label"], funding_df["Funding"]):
 ax2.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
 ax2.set_ylabel("Total Funding ($)", fontsize=LABEL_SIZE)
 ax2.set_title("Sponsored CBHDS Research Funding", fontsize=TITLE_SIZE, fontweight='bold')
-ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax2.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax2.yaxis.set_major_formatter(FuncFormatter(money_formatter))
 
@@ -987,7 +987,7 @@ ax6.set_xticklabels(final_df["FY Label"])
 ax6.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
 ax6.set_ylabel("Amount ($)", fontsize=LABEL_SIZE)
 ax6.set_title("CBHDS Funding and Salary Expenses", fontsize=TITLE_SIZE, fontweight='bold')
-ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax6.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax6.yaxis.set_major_formatter(FuncFormatter(money_formatter))
 
