@@ -1,6 +1,6 @@
 # CBHDS Activity Dashboard
 
-This Streamlit dashboard aggregates and visualizes multiple CBHDS (Center for Behavioral Health and Developmental Sciences) data sources, including publications, funding, staffing (FTE), drop-ins, collaborations, and salary expenses.
+This Streamlit dashboard aggregates and visualizes multiple CBHDS data sources, including publications, funding, staffing (FTE), drop-ins, collaborations, and salary expenses.
 
 ---
 
