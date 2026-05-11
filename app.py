@@ -25,7 +25,7 @@ POINT_LABEL_SIZE = 12
 LEGEND_SIZE = 13
 
 FIG_WIDTH = 12
-FIG_HEIGHT = 6
+FIG_HEIGHT = 8
 
 @st.cache_data(ttl=86400)
 def load_publications():
