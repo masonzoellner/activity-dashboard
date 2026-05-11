@@ -23,6 +23,8 @@ LABEL_SIZE = 13
 TICK_SIZE = 11
 POINT_LABEL_SIZE = 11
 LEGEND_SIZE = 11
+FIG_WIDTH = 12
+FIG_HEIGHT = 6
 
 @st.cache_data(ttl=86400)
 def load_publications():
@@ -84,7 +86,7 @@ fte_plot = fte_df[
 fte_plot = fte_plot.set_index("Year")
 
 # Create stacked bar chart
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 fte_plot.plot(
     kind="bar",
@@ -97,7 +99,7 @@ ax.set_ylabel("Total FTE", fontsize=LABEL_SIZE)
 ax.set_title("CBHDS FTE Growth Over Time", fontsize=TITLE_SIZE, fontweight='bold')
 ax.tick_params(axis='both', labelsize=TICK_SIZE)
 ax.legend(title="Role", bbox_to_anchor=(1.05, 1), fontsize=LEGEND_SIZE)
-
+fig.tight_layout()
 st.pyplot(fig)
 
 st.divider()
@@ -513,7 +515,7 @@ funding_df["FY Label"] = funding_df["Fiscal Year"].apply(
 # Plot
 # -----------------------------
 
-fig2, ax2 = plt.subplots()
+fig2, ax2 = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 ax2.plot(
     funding_df["FY Label"],
@@ -538,7 +540,7 @@ ax2.set_title("Sponsored CBHDS Research Funding", fontsize=TITLE_SIZE, fontweigh
 ax2.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax2.yaxis.set_major_formatter(FuncFormatter(money_formatter))
-
+fig2.tight_layout()
 st.pyplot(fig2)
 
 def clean_money(value):
@@ -636,7 +638,7 @@ pending_df["FY Label"] = pending_df["Fiscal Year"].apply(
 
 st.subheader("Pending Funding")
 
-fig3, ax3 = plt.subplots(figsize=(12, 8))
+fig3, ax3 = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 ax3.bar(
     pending_df["FY Label"],
@@ -705,7 +707,7 @@ ax3.legend(fontsize=LEGEND_SIZE)
 
 ax3.margins(y=0.15)
 fig3.tight_layout()
-
+fig3.tight_layout()
 st.pyplot(fig3)
 
 API_TOKEN = "71F77DB5020F97309F14880D1E2D254A"
@@ -754,7 +756,7 @@ def process_dropins(df):
 
 dropins_df = process_dropins(load_redcap_data())
 
-fig4, ax4 = plt.subplots()
+fig4, ax4 = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 ax4.plot(
     dropins_df["FY Label"],
@@ -835,7 +837,7 @@ df2 = load_collab_data(API_TOKEN_COLLAB_2)
 
 collab_df = process_collaborations(df1, df2)
 
-fig5, ax5 = plt.subplots()
+fig5, ax5 = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 ax5.plot(
     collab_df["FY Label"],
@@ -878,7 +880,7 @@ combined_activity["FY Label"] = combined_activity["Fiscal Year"].apply(
     lambda x: f"FY{int(x) % 100}"
 )
 
-fig_activity, ax_activity = plt.subplots(figsize=(12, 6))
+fig_activity, ax_activity = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 # Drop-ins
 ax_activity.plot(
@@ -921,7 +923,7 @@ ax_activity.set_title("CBHDS Drop-ins and Collaborations Over Time", fontsize=TI
 ax.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax_activity.legend(fontsize=LEGEND_SIZE)
-
+fig_activity.tight_layout()
 st.pyplot(fig_activity)
 
 # -----------------------------
@@ -943,7 +945,7 @@ with col2:
 
 st.subheader("CBHDS Funding and Salary Expenses")
 
-fig6, ax6 = plt.subplots()
+fig6, ax6 = plt.subplots(figsize=(FIG_WIDTH, FIG_HEIGHT))
 
 x = range(len(final_df))
 width = 0.35
