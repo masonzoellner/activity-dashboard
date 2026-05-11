@@ -23,7 +23,7 @@ LABEL_SIZE = 16
 TICK_SIZE = 14
 POINT_LABEL_SIZE = 12
 LEGEND_SIZE = 13
-
+DATA_LABEL_SIZE = 14
 FIG_WIDTH = 12
 FIG_HEIGHT = 8
 
@@ -532,7 +532,7 @@ for x, y in zip(funding_df["FY Label"], funding_df["Funding"]):
         f"${y:,.0f}",
         ha='center',
         va='bottom',
-        fontsize=9
+        fontsize=DATA_LABEL_SIZE
     )
 
 ax2.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
@@ -664,7 +664,7 @@ for i, (vt, cbhds) in enumerate(zip(pending_df["VT"], pending_df["CBHDS"])):
             f"${vt/1e6:.1f}M",
             ha='center',
             va='center',
-            fontsize=10,
+            fontsize=DATA_LABEL_SIZE,
             color='white',
             fontweight='bold'
         )
@@ -681,7 +681,7 @@ for i, (vt, cbhds) in enumerate(zip(pending_df["VT"], pending_df["CBHDS"])):
                 f"${cbhds/1e6:.1f}M",
                 ha='center',
                 va='bottom',
-                fontsize=10,
+                fontsize=DATA_LABEL_SIZE,
                 color='black',
                 fontweight='bold'
             )
@@ -694,7 +694,7 @@ for i, (vt, cbhds) in enumerate(zip(pending_df["VT"], pending_df["CBHDS"])):
                 f"${cbhds/1e6:.1f}M",
                 ha='center',
                 va='center',
-                fontsize=10,
+                fontsize=DATA_LABEL_SIZE,
                 color='white',
                 fontweight='bold'
             )
@@ -905,7 +905,7 @@ for x, y in zip(combined_activity["FY Label"], combined_activity["Drop-ins"]):
         x,
         y,
         str(int(y)),
-        fontsize=POINT_LABEL_SIZE,
+        fontsize=DATA_LABEL_SIZE,
         fontweight='bold'
     )
 
@@ -914,7 +914,7 @@ for x, y in zip(combined_activity["FY Label"], combined_activity["Collaborations
         x,
         y,
         str(int(y)),
-        fontsize=POINT_LABEL_SIZE,
+        fontsize=DATA_LABEL_SIZE,
         fontweight='bold'
     )
 
@@ -1010,7 +1010,7 @@ for i, total in enumerate(stack_totals):
             f"${total/1e6:.1f}M",
             ha='center',
             va='bottom',
-            fontsize=7,
+            fontsize=DATA_LABEL_SIZE,
             fontweight='bold'
         )
 
