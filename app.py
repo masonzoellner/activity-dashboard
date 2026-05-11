@@ -702,7 +702,7 @@ for i, (vt, cbhds) in enumerate(zip(pending_df["VT"], pending_df["CBHDS"])):
 ax3.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
 ax3.set_ylabel("Funding ($)", fontsize=LABEL_SIZE)
 ax3.set_title("Pending CBHDS Research Funding", fontsize=TITLE_SIZE, fontweight='bold')
-ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax3.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax3.legend(fontsize=LEGEND_SIZE)
 
@@ -780,7 +780,7 @@ for x, y in zip(dropins_df["FY Label"], dropins_df["Drop-ins"]):
 ax4.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
 ax4.set_ylabel("Number of Drop-ins", fontsize=LABEL_SIZE)
 ax4.set_title("CBHDS Drop-ins Over Time", fontsize=TITLE_SIZE, fontweight='bold')
-ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax4.tick_params(axis='both', labelsize=TICK_SIZE)
 
 #st.pyplot(fig4)
 
@@ -861,7 +861,7 @@ for x, y in zip(collab_df["FY Label"], collab_df["Collaborations"]):
 ax5.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
 ax5.set_ylabel("Number of Collaborations", fontsize=LABEL_SIZE)
 ax5.set_title("CBHDS Collaborations Over Time", fontsize=TITLE_SIZE, fontweight='bold')
-ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax5.tick_params(axis='both', labelsize=TICK_SIZE)
 
 #st.pyplot(fig5)
 
@@ -921,7 +921,7 @@ for x, y in zip(combined_activity["FY Label"], combined_activity["Collaborations
 ax_activity.set_xlabel("Fiscal Year", fontsize=LABEL_SIZE)
 ax_activity.set_ylabel("Count", fontsize=LABEL_SIZE)
 ax_activity.set_title("CBHDS Drop-ins and Collaborations Over Time", fontsize=TITLE_SIZE, fontweight='bold')
-ax.tick_params(axis='both', labelsize=TICK_SIZE)
+ax_activity.tick_params(axis='both', labelsize=TICK_SIZE)
 
 ax_activity.legend(fontsize=LEGEND_SIZE)
 fig_activity.tight_layout()
