@@ -11,7 +11,7 @@ The dashboard combines data from:
 - Google Sheets (FTE, Grants, Contracts, Internal Funding, Salaries)
 - REDCap databases (Drop-ins and Collaborations)
 
-It standardizes everything into **Fiscal Year (FY)** format (July–June cycle) for consistent reporting.
+It standardizes everything into **Fiscal Year (FY)** format (July 1–June 30 cycle) for consistent reporting.
 
 ---
 
