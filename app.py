@@ -339,7 +339,7 @@ def load_salaries():
     for col in df.columns[1:]:
         df[col] = df[col].apply(clean_cell)
 
-    # ❗ DROP Shared Costs
+    # Drop Shared Costs
     if "Shared Costs" in df.columns:
         df_no_shared = df.drop(columns=["Shared Costs"])
     else:
@@ -351,8 +351,17 @@ def load_salaries():
     # Alexandra Hanlon column ONLY
     df["Statistics (COS)"] = df.get("Alexandra Hanlon", 0)
 
-    # Extract FY
-    df["Fiscal Year"] = df["FY"].str.extract(r"(\d+)").astype(int)
+    # Extract FY safely
+    df["Fiscal Year"] = pd.to_numeric(
+        df["FY"].astype(str).str.extract(r"(\d+)")[0],
+        errors="coerce"
+    )
+
+    # Remove bad rows
+    df = df.dropna(subset=["Fiscal Year"])
+
+    # Convert to int
+    df["Fiscal Year"] = df["Fiscal Year"].astype(int)
 
     return df[["Fiscal Year", "Salary Expenses", "Statistics (COS)"]]
 
